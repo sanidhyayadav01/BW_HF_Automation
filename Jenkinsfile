@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -11,7 +10,6 @@ pipeline {
     }
 
     stages {
-
         stage('Clone Repository') {
             steps {
                 git branch: 'main', url: 'https://github.com/sanidhyayadav01/BW_HF_Automation.git'
@@ -31,47 +29,46 @@ pipeline {
         }
 
         stage('Run Cypress Tests') {
-
             steps {
-                // IMPORTANT: allows pipeline to continue even if tests fail
-                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    bat 'npx cypress run'
+                script {
+                    // allows report generation even if tests fail
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                        bat 'npx cypress run'
+                    }
                 }
             }
         }
 
         stage('Generate Allure Results') {
             steps {
-                // ensure folder exists even if tests fail
                 bat 'if not exist allure-results mkdir allure-results'
             }
         }
 
         stage('Publish Allure Report') {
             steps {
-                // don't fail pipeline if allure plugin has issue
-                catchError {
-                    allure([
-                        includeProperties: false,
-                        jdk: '',
-                        results: [[path: 'allure-results']]
-                    ])
+                script {
+                    catchError(buildResult: 'UNSTABLE') {
+                        allure([
+                            includeProperties: false,
+                            jdk: '',
+                            results: [[path: 'allure-results']]
+                        ])
+                    }
                 }
             }
         }
     }
 
     post {
-
         always {
-
-            // Archive everything useful (VERY IMPORTANT for debugging)
+            // Archive EVERYTHING useful for debugging
             archiveArtifacts artifacts: '''
                 allure-results/**,
                 allure-report/**,
                 cypress/screenshots/**,
                 cypress/videos/**
-            ''', fingerprint: true
+            ''', fingerprint: true, allowEmptyArchive: true
 
             echo 'Pipeline execution completed.'
         }
@@ -87,23 +84,25 @@ Cypress Execution Completed Successfully
 Build URL:
 ${env.BUILD_URL}
 
-Allure Report:
+📊 Allure Report:
 ${env.BUILD_URL}allure
+
+📁 Screenshots/Videos are attached below.
 """,
 
                 to: 'syadav@trueigtech.com',
 
                 // ==============================
-                // 👥 MULTIPLE TO (UNCOMMENT WHEN NEEDED)
+                // MULTIPLE TO (UNCOMMENT IF NEEDED)
                 // ==============================
                 // to: "qa1@company.com,qa2@company.com,lead@company.com",
 
                 // ==============================
-                // 👥 CC RECIPIENTS (UNCOMMENT WHEN NEEDED)
+                // CC RECIPIENTS (UNCOMMENT IF NEEDED)
                 // ==============================
                 // cc: "teamlead@company.com,manager@company.com",
 
-                attachmentsPattern: 'cypress/screenshots/**,cypress/videos/**'
+                attachmentsPattern: 'cypress/screenshots/**/*.png,cypress/videos/**/*.mp4'
             )
         }
 
@@ -118,25 +117,26 @@ Cypress Execution FAILED
 Build URL:
 ${env.BUILD_URL}
 
-Please check:
-- Jenkins console logs
-- Screenshots
-- Videos attached in email
+Check:
+- Jenkins Console Logs
+- Screenshots (attached)
+- Videos (attached)
+- Allure Results
 """,
 
                 to: 'syadav@trueigtech.com',
 
                 // ==============================
-                // 👥 MULTIPLE TO (UNCOMMENT WHEN NEEDED)
+                // 👥 MULTIPLE TO (UNCOMMENT IF NEEDED)
                 // ==============================
                 // to: "qa1@company.com,qa2@company.com,dev@company.com",
 
                 // ==============================
-                // 👥 CC RECIPIENTS (UNCOMMENT WHEN NEEDED)
+                // 👥 CC RECIPIENTS (UNCOMMENT IF NEEDED)
                 // ==============================
                 // cc: "teamlead@company.com,manager@company.com",
 
-                attachmentsPattern: 'cypress/screenshots/**,cypress/videos/**'
+                attachmentsPattern: 'cypress/screenshots/**/*.png,cypress/videos/**/*.mp4'
             )
         }
     }
