@@ -1,0 +1,40 @@
+# Node modules
+node_modules/
+
+# Cypress artifacts
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# Allure reports
+allure-results/
+allure-report/
+
+# Runtime generated fixture
+cypress/fixtures/runtimeUser.json
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Environment files
+.env
+.env.*
+
+# Jenkins workspace temp
+workspace/
+
+# Coverage
+coverage/
+
+# Cypress cache
+.cache/
