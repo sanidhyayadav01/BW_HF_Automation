@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     tools {
@@ -10,6 +11,7 @@ pipeline {
     }
 
     stages {
+
         stage('Clone Repository') {
             steps {
                 git branch: 'main', url: 'https://github.com/sanidhyayadav01/BW_HF_Automation.git'
@@ -31,7 +33,7 @@ pipeline {
         stage('Run Cypress Tests') {
             steps {
                 script {
-                    // allows report generation even if tests fail
+                    // ✅ Continue pipeline even if tests fail
                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                         bat 'npx cypress run'
                     }
@@ -61,8 +63,9 @@ pipeline {
     }
 
     post {
+
         always {
-            // Archive EVERYTHING useful for debugging
+
             archiveArtifacts artifacts: '''
                 allure-results/**,
                 allure-report/**,
@@ -92,14 +95,10 @@ ${env.BUILD_URL}allure
 
                 to: 'syadav@trueigtech.com',
 
-                // ==============================
-                // MULTIPLE TO (UNCOMMENT IF NEEDED)
-                // ==============================
+                // 👇 MULTIPLE TO (UNCOMMENT IF NEEDED)
                 // to: "qa1@company.com,qa2@company.com,lead@company.com",
 
-                // ==============================
-                // CC RECIPIENTS (UNCOMMENT IF NEEDED)
-                // ==============================
+                // 👇 CC RECIPIENTS (UNCOMMENT IF NEEDED)
                 // cc: "teamlead@company.com,manager@company.com",
 
                 attachmentsPattern: 'cypress/screenshots/**/*.png,cypress/videos/**/*.mp4'
@@ -126,14 +125,42 @@ Check:
 
                 to: 'syadav@trueigtech.com',
 
-                // ==============================
-                // 👥 MULTIPLE TO (UNCOMMENT IF NEEDED)
-                // ==============================
+                // 👇 MULTIPLE TO (UNCOMMENT IF NEEDED)
                 // to: "qa1@company.com,qa2@company.com,dev@company.com",
 
-                // ==============================
-                // 👥 CC RECIPIENTS (UNCOMMENT IF NEEDED)
-                // ==============================
+                // 👇 CC RECIPIENTS (UNCOMMENT IF NEEDED)
+                // cc: "teamlead@company.com,manager@company.com",
+
+                attachmentsPattern: 'cypress/screenshots/**/*.png,cypress/videos/**/*.mp4'
+            )
+        }
+
+        // 🔥 IMPORTANT FIX: handles Cypress failures properly
+        unstable {
+            emailext(
+
+                subject: "⚠ BW Automation UNSTABLE - ${currentBuild.fullDisplayName}",
+
+                body: """
+Cypress Execution COMPLETED WITH FAILURES
+
+Build URL:
+${env.BUILD_URL}
+
+Some test cases failed, but pipeline completed successfully.
+
+Check:
+- Allure Report
+- Screenshots
+- Videos
+""",
+
+                to: 'syadav@trueigtech.com',
+
+                // 👇 MULTIPLE TO (UNCOMMENT IF NEEDED)
+                // to: "qa1@company.com,qa2@company.com,lead@company.com",
+
+                // 👇 CC RECIPIENTS (UNCOMMENT IF NEEDED)
                 // cc: "teamlead@company.com,manager@company.com",
 
                 attachmentsPattern: 'cypress/screenshots/**/*.png,cypress/videos/**/*.mp4'
