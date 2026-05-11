@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -7,11 +6,10 @@ pipeline {
     }
 
     environment {
-        CI = "true"
+        CI = 'true'
     }
 
     stages {
-
         stage('Clone Repository') {
             steps {
                 git branch: 'main', url: 'https://github.com/sanidhyayadav01/BW_HF_Automation.git'
@@ -36,12 +34,6 @@ pipeline {
             }
         }
 
-        stage('Generate Allure Report') {
-            steps {
-                bat 'allure generate allure-results --clean -o allure-report'
-            }
-        }
-
         stage('Publish Allure Report') {
             steps {
                 allure([
@@ -54,48 +46,78 @@ pipeline {
     }
 
     post {
-
         always {
-            archiveArtifacts artifacts: 'allure-report/**', fingerprint: true
+            // 📦 Archive reports + screenshots + videos
+            archiveArtifacts artifacts: '''
+                allure-results/**,
+                allure-report/**,
+                cypress/screenshots/**,
+                cypress/videos/**
+            ''', fingerprint: true
+
             echo 'Pipeline execution completed.'
         }
 
         success {
             emailext(
+
+                // 📧 EMAIL SUBJECT
                 subject: "✔ BW Automation SUCCESS - ${currentBuild.fullDisplayName}",
+
+                // 📧 EMAIL BODY
                 body: """
-                    Cypress Execution Completed Successfully
+Cypress Execution Completed Successfully
 
-                    Build URL:
-                    ${env.BUILD_URL}
+Build URL:
+${env.BUILD_URL}
 
-                    Allure Report:
-                    ${env.BUILD_URL}allure
-                """,
-                to: "syadav@trueigtech.com"
+Allure Report:
+${env.BUILD_URL}allure
+""",
 
-                // 🔹 Multiple emails (enable when needed)
-                // to: "syadav@trueigtech.com,user2@gmail.com,user3@gmail.com"
+                // 👇 PRIMARY RECEIVER (TO)
+                to: 'syadav@trueigtech.com',
 
-                // 🔹 CC recipients (enable when needed)
-                // cc: "qa.team@company.com,manager@company.com"
+                // ==========================================
+                // 👥 MULTIPLE TO RECIPIENTS (UNCOMMENT WHEN NEEDED)
+                // ==========================================
+                // Example:
+                // to: "qa1@company.com,qa2@company.com,lead@company.com",
+
+            // ==========================================
+            // 👥 CC RECIPIENTS (UNCOMMENT WHEN NEEDED)
+            // ==========================================
+            // Example:
+            // cc: "teamlead@company.com,manager@company.com,qahead@company.com"
             )
         }
 
         failure {
             emailext(
+
                 subject: "✘ BW Automation FAILED - ${currentBuild.fullDisplayName}",
+
                 body: """
-                    Cypress Execution FAILED
+Cypress Execution FAILED
 
-                    Build URL:
-                    ${env.BUILD_URL}
+Build URL:
+${env.BUILD_URL}
 
-                    Please check Jenkins logs immediately.
-                """,
-                to: "syadav@trueigtech.com"
+Check Jenkins logs and screenshots.
+""",
 
-                // cc: "qa.team@company.com,manager@company.com"
+                // 👇 PRIMARY RECEIVER (TO)
+                to: 'syadav@trueigtech.com',
+
+                // ==========================================
+                // 👥 MULTIPLE TO RECIPIENTS (UNCOMMENT WHEN NEEDED)
+                // ==========================================
+                // to: "qa1@company.com,qa2@company.com,dev@company.com",
+
+            // ==========================================
+            // 👥 CC RECIPIENTS (UNCOMMENT WHEN NEEDED)
+            // ==========================================
+            // cc: "teamlead@company.com,manager@company.com"
             )
         }
     }
