@@ -14,7 +14,7 @@ pipeline {
 
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/sanidhyayadav01/BW_HF_Automation.git'
+                git branch: 'main', url: 'https://github.com/sanidhyayadav01/BW_HF_Automation.git'
             }
         }
 
