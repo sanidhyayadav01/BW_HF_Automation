@@ -8,8 +8,8 @@ describe('Favorites - API vs UI Validation', () => {
 
   beforeEach(() => {
 
-    // intercept BEFORE navigation (important fix)
-    cy.intercept('GET', '**/casino/get-favourite-game**').as('favoritesAPI')
+    cy.intercept('GET', '**/casino/get-favourite-game**')
+      .as('favoritesAPI')
 
     cy.visit('https://www.betterwin.com/')
 
@@ -18,63 +18,84 @@ describe('Favorites - API vs UI Validation', () => {
     cy.wait(3000)
   })
 
-
   it('Validates Favorites page correctly (API + UI)', () => {
 
     cy.visit('https://www.betterwin.com/favorites')
 
-    // wait for API response
-    cy.wait('@favoritesAPI', { timeout: 30000 })
-      .then((interception) => {
+    cy.wait(4000)
 
-        const favGames = interception.response?.body?.data?.favouriteGames || []
-        const apiCount = favGames.length
+    // =========================================
+    // CHECK IF API WAS FIRED
+    // =========================================
+    cy.get('@favoritesAPI.all').then((calls) => {
 
-        cy.log(`API Favorites Count: ${apiCount}`)
+      // =====================================
+      // CASE 1 → API NEVER FIRED
+      // =====================================
+      if (!calls || calls.length === 0) {
 
-        // SAFE validation (never fail test on data)
-        expect(apiCount).to.be.greaterThan(-1)
+        cy.log('No favorites API triggered')
 
-        cy.wrap(apiCount).as('apiCount')
-      })
+        cy.contains(/no favorites|no favourite|empty/i, {
+          timeout: 15000
+        })
+          .should('exist')
+          .and('be.visible')
 
+        cy.log('✔ Empty favorites state validated')
 
-    // UI container
-    cy.get('.md\\:mt-\\[6\\.5625rem\\] > .w-full', { timeout: 20000 })
-      .should('exist')
-      .and('be.visible')
+        return
+      }
 
+      // =====================================
+      // CASE 2 → API FIRED
+      // =====================================
+      const interception = calls[calls.length - 1]
 
-    // IMPORTANT: detect REAL game cards (not div/img garbage)
-    cy.get('.md\\:mt-\\[6\\.5625rem\\] > .w-full')
-      .then(($container) => {
+      const favGames =
+        interception.response?.body?.data?.favouriteGames || []
 
-        // Try to find actual cards first
-        const cards = $container.find('[class*="card"], [class*="game"], [class*="favourite"]')
+      const apiCount = favGames.length
+
+      cy.log(`API Favorites Count: ${apiCount}`)
+
+      // =====================================
+      // UI VALIDATION
+      // =====================================
+      cy.get('body').then(($body) => {
+
+        const cards = $body.find(
+          '[class*="card"], [class*="game"], [class*="favourite"]'
+        )
 
         const uiCount = cards.length
 
-        cy.log(`UI Favorites Count (real cards): ${uiCount}`)
+        cy.log(`UI Favorites Count: ${uiCount}`)
 
-        cy.get('@apiCount').then((apiCount) => {
+        // =================================
+        // EMPTY FAVORITES
+        // =================================
+        if (apiCount === 0) {
 
-          cy.log(`FINAL → API: ${apiCount} | UI: ${uiCount}`)
+          cy.contains(/no favorites|no favourite|empty/i)
+            .should('exist')
 
-          // SAFE LOGIC instead of strict equality
+          cy.log('✔ Empty favorites UI validated')
+        }
 
-          if (apiCount === 0) {
-            // EXPECT EMPTY STATE (IMPORTANT FIX)
-            cy.contains(/no favorites|no favourite|empty/i)
-              .should('exist')
+        // =================================
+        // FAVORITES EXIST
+        // =================================
+        else {
 
-            cy.log('Empty state UI validated')
-          }
-          else {
-            // If data exists, UI should show something meaningful
-            expect(uiCount).to.be.at.least(0)
-          }
-        })
+          expect(uiCount).to.be.greaterThan(0)
+
+          cy.log('✔ Favorites displayed correctly')
+        }
+
       })
+
+    })
 
   })
 

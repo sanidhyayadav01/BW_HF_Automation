@@ -1,11 +1,6 @@
 const { defineConfig } = require("cypress");
 const { allureCypress } = require("allure-cypress/reporter");
 
-const {
-  saveUser,
-  getUser,
-} = require("./cypress/utils/userManager");
-
 module.exports = defineConfig({
 
   e2e: {
@@ -25,22 +20,6 @@ module.exports = defineConfig({
     screenshotOnRunFailure: true,
 
     setupNodeEvents(on, config) {
-
-      on("task", {
-
-        saveRuntimeUser(user) {
-
-          saveUser(user);
-
-          return null;
-        },
-
-        getRuntimeUser() {
-
-          return getUser();
-        },
-
-      });
 
       allureCypress(on, config);
 

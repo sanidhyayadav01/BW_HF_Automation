@@ -46,6 +46,8 @@ pipeline {
 
                 // Recreate folders
                 bat 'mkdir allure-results'
+
+                bat 'del /f /q allure-results\\*'
             }
         }
 
@@ -123,7 +125,6 @@ pipeline {
                 allure-results/**,
                 allure-report/**,
                 cypress/screenshots/**/*.png,
-                cypress/videos/**/*.mp4
             ''',
             fingerprint: true,
             allowEmptyArchive: true
@@ -151,7 +152,6 @@ ${env.BUILD_URL}allure
 
 Artifacts:
 - Screenshots
-- Videos
 - Allure Report
 """,
 
@@ -159,7 +159,6 @@ Artifacts:
 
                 attachmentsPattern: '''
                     cypress/screenshots/**/*.png,
-                    cypress/videos/**/*.mp4
                 '''
             )
         }
@@ -183,14 +182,12 @@ Check:
 - Jenkins Console Logs
 - Allure Report
 - Attached Screenshots
-- Attached Videos
 """,
 
                 to: 'syadav@trueigtech.com',
 
                 attachmentsPattern: '''
                     cypress/screenshots/**/*.png,
-                    cypress/videos/**/*.mp4
                 '''
             )
         }
