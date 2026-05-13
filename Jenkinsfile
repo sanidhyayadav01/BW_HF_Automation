@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -11,7 +10,6 @@ pipeline {
     }
 
     stages {
-
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
@@ -42,23 +40,18 @@ pipeline {
         }
 
         stage('Run Cypress Tests') {
-
             steps {
                 script {
-
                     currentBuild.result = 'SUCCESS'
 
                     try {
-
                         bat '''
                         npx cypress run ^
                         --spec "cypress/e2e/**/*.cy.js"
                         '''
-
                     } catch (err) {
-
                         currentBuild.result = 'FAILURE'
-                        echo "Cypress failed but pipeline will continue..."
+                        echo 'Cypress failed but pipeline will continue...'
                     }
                 }
             }
@@ -80,17 +73,27 @@ pipeline {
 
         stage('Create ZIP Report') {
             steps {
-                bat '''
-                powershell Compress-Archive -Path allure-results,cypress\\screenshots -DestinationPath test-report.zip -Force
-                '''
+                script {
+                    bat '''
+            powershell -Command ^
+            $items = @(); ^
+            if (Test-Path "allure-results") { $items += "allure-results" }; ^
+            if (Test-Path "cypress\\screenshots") { $items += "cypress\\screenshots" }; ^
+            if (Test-Path "allure-report") { $items += "allure-report" }; ^
+            ^
+            if ($items.Count -gt 0) { ^
+                Compress-Archive -Path $items -DestinationPath test-report.zip -Force ^
+            } else { ^
+                Write-Host "No artifacts found for ZIP" ^
+            }
+            '''
+                }
             }
         }
     }
 
     post {
-
         always {
-
             archiveArtifacts artifacts: '''
                 test-report.zip,
                 allure-results/**,
@@ -103,7 +106,6 @@ pipeline {
         }
 
         success {
-
             emailext(
                 subject: "✔ QA Daily Status — BetterWin Automation — ${new Date().format('dd-MM-yyyy')} ✅ PASS",
 
@@ -118,14 +120,14 @@ ${env.BUILD_URL}
 📦 Report Attached: ZIP File
 📊 Allure Report Available in Jenkins
 
-Best Regards,  
+Best Regards,
 QA Team (Automation)
 """,
 
-                to: """
+                to: '''
 syadav@trueigtech.com,
 hyadav@trueigtech.com
-""",
+''',
 
                 attachmentsPattern: '''
                     test-report.zip
@@ -134,7 +136,6 @@ hyadav@trueigtech.com
         }
 
         unstable {
-
             emailext(
                 subject: "⚠ QA Daily Status — BetterWin Automation — ${new Date().format('dd-MM-yyyy')} ⚠ ISSUES FOUND",
 
@@ -149,15 +150,14 @@ ${env.BUILD_URL}
 📦 Report Attached: ZIP File
 📊 Check Allure + Screenshots inside ZIP
 
-Best Regards,  
+Best Regards,
 QA Team (Automation)
 """,
 
-                to: """
+                to: '''
 syadav@trueigtech.com,
 hyadav@trueigtech.com
-""",
-
+''',
 
                 attachmentsPattern: '''
                     test-report.zip
@@ -166,7 +166,6 @@ hyadav@trueigtech.com
         }
 
         failure {
-
             emailext(
                 subject: "✘ QA Daily Status — BetterWin Automation — ${new Date().format('dd-MM-yyyy')} ❌ FAILED",
 
@@ -180,15 +179,14 @@ Critical issue occurred during execution.
 
 📦 ZIP report attached (if generated)
 
-Best Regards,  
+Best Regards,
 QA Team (Automation)
 """,
 
-                to: """
+                to: '''
 syadav@trueigtech.com,
 hyadav@trueigtech.com
-""",
-
+''',
 
                 attachmentsPattern: '''
                     test-report.zip,
