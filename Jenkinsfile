@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -11,7 +10,9 @@ pipeline {
     }
 
     stages {
-
+        // =========================================
+        // CLONE REPOSITORY
+        // =========================================
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
@@ -19,12 +20,18 @@ pipeline {
             }
         }
 
+        // =========================================
+        // INSTALL DEPENDENCIES
+        // =========================================
         stage('Install Dependencies') {
             steps {
                 bat 'npm install'
             }
         }
 
+        // =========================================
+        // VERIFY CYPRESS
+        // =========================================
         stage('Verify Cypress') {
             steps {
                 bat 'npx cypress verify'
@@ -36,95 +43,61 @@ pipeline {
         // =========================================
         stage('Clean Previous Reports') {
             steps {
-
-                // Delete old allure + screenshots + videos
                 bat 'if exist allure-results rmdir /s /q allure-results'
+
                 bat 'if exist allure-report rmdir /s /q allure-report'
 
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
-                bat 'if exist cypress\\videos rmdir /s /q cypress\\videos'
 
-                // Recreate folders
                 bat 'mkdir allure-results'
-
-                bat 'del /f /q allure-results\\*'
             }
         }
 
         // =========================================
-        // RUN SIGNUP FIRST
+        // RUN CYPRESS TESTS
         // =========================================
-        stage('Run Signup Setup Spec') {
+        stage('Run Cypress Tests') {
             steps {
-
                 script {
-
-                    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-
+                    try {
                         bat '''
-                        npx cypress run ^
-                        --spec "cypress/e2e/00_auth/01_LoginSignup.cy.js"
-                        '''
-
+    npx cypress run ^
+    --spec "cypress/e2e/00_auth/01_LoginSignup.cy.js,cypress/e2e/**/*.cy.js"
+    '''
+                    }
+                    finally {
+                        echo 'Cypress execution completed.'
                     }
                 }
             }
         }
 
         // =========================================
-        // RUN REMAINING TESTS
-        // =========================================
-        stage('Run Remaining Cypress Tests') {
-            steps {
-
-                script {
-
-                    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-
-                        bat '''
-                        npx cypress run ^
-                        --spec "cypress/e2e/**/*.cy.js,^cypress/e2e/00_auth/01_LoginSignup.cy.js"
-                        '''
-
-                    }
-                }
-            }
-        }
-
-        // =========================================
-        // GENERATE ALLURE
+        // GENERATE ALLURE REPORT
         // =========================================
         stage('Publish Allure Report') {
-
             steps {
-
-                script {
-
-                    catchError(buildResult: 'UNSTABLE') {
-
-                        allure([
-                            includeProperties: false,
-                            jdk: '',
-                            results: [[path: 'allure-results']]
-                        ])
-
-                    }
-                }
+                allure([
+                    includeProperties: false,
+                    jdk: '',
+                    results: [[path: 'allure-results']]
+                ])
             }
         }
     }
 
+    // =========================================
+    // POST ACTIONS
+    // =========================================
     post {
-
-        // =========================================
+        // =====================================
         // ALWAYS
-        // =========================================
+        // =====================================
         always {
-
             archiveArtifacts artifacts: '''
                 allure-results/**,
                 allure-report/**,
-                cypress/screenshots/**/*.png,
+                cypress/screenshots/**/*.png
             ''',
             fingerprint: true,
             allowEmptyArchive: true
@@ -132,11 +105,10 @@ pipeline {
             echo 'Pipeline execution completed.'
         }
 
-        // =========================================
+        // =====================================
         // SUCCESS MAIL
-        // =========================================
+        // =====================================
         success {
-
             emailext(
 
                 subject: "✔ BW Automation SUCCESS - ${currentBuild.fullDisplayName}",
@@ -155,19 +127,28 @@ Artifacts:
 - Allure Report
 """,
 
-                to: 'syadav@trueigtech.com',
+                // MAIN RECIPIENTS
+                to: '''
+                    syadav@trueigtech.com,
+                    hyadav@trueigtech.com,
+                ''',
+
+                // CC RECIPIENTS
+                // cc: '''
+                //     teamlead@company.com,
+                //     devlead@company.com
+                // ''',
 
                 attachmentsPattern: '''
-                    cypress/screenshots/**/*.png,
+                    cypress/screenshots/**/*.png
                 '''
             )
         }
 
-        // =========================================
+        // =====================================
         // FAILURE MAIL
-        // =========================================
+        // =====================================
         failure {
-
             emailext(
 
                 subject: "✘ BW Automation FAILED - ${currentBuild.fullDisplayName}",
@@ -182,46 +163,25 @@ Check:
 - Jenkins Console Logs
 - Allure Report
 - Attached Screenshots
-""",
-
-                to: 'syadav@trueigtech.com',
-
-                attachmentsPattern: '''
-                    cypress/screenshots/**/*.png,
-                '''
-            )
-        }
-
-        // =========================================
-        // UNSTABLE MAIL
-        // =========================================
-        unstable {
-
-            emailext(
-
-                subject: "⚠ BW Automation UNSTABLE - ${currentBuild.fullDisplayName}",
-
-                body: """
-Cypress Execution Completed WITH FAILURES
-
-Build URL:
-${env.BUILD_URL}
-
-Some test cases failed.
-
-Check:
-- Allure Report
-- Screenshots
-- Jenkins Logs
 
 Allure:
 ${env.BUILD_URL}allure
 """,
 
-                to: 'syadav@trueigtech.com',
+                // MAIN RECIPIENTS
+                to: '''
+                    syadav@trueigtech.com,
+                    hyadav@trueigtech.com,
+                ''',
+
+                // CC RECIPIENTS
+                // cc: '''
+                //     teamlead@company.com,
+                //     devlead@company.com
+                // ''',
 
                 attachmentsPattern: '''
-                    cypress/screenshots/**/*.png,
+                    cypress/screenshots/**/*.png
                 '''
             )
         }
