@@ -6,7 +6,7 @@ beforeEach(function () {
 
 describe("Validating different sections of Casino", function () {
   it("Validating Casino Flow", function () {
-    cy.visit("https://betterwin.com/");
+    cy.visit("https://www.betterwin.com/");
 
     cy.intercept("GET", "**/casino/games*").as("getGames");
 

@@ -8,7 +8,7 @@ describe("Language Selection - Italiano Switch", () => {
   beforeEach(() => {
     cy.intercept("POST", "**/user/login*").as("loginAPI");
 
-    cy.visit("https://betterwin.com/");
+    cy.visit("https://www.betterwin.com/");
 
     cy.login();
 

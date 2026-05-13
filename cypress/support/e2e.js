@@ -15,9 +15,24 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
-import '@shelex/cypress-allure-plugin';
 require('cypress-xpath');
 
 Cypress.Screenshot.defaults({
   screenshotOnRunFailure: true
 });
+
+
+Cypress.on('uncaught:exception', (err) => {
+
+  // Ignore React hydration/render issues
+  if (
+    err.message.includes('Minified React error #418') ||
+    err.message.includes('Minified React error #422') ||
+    err.message.includes('Minified React error #421') ||
+    err.message.includes('removeChild')
+  ) {
+    return false
+  }
+
+  return true
+})

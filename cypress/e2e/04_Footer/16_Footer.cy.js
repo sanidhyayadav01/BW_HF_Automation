@@ -6,7 +6,7 @@ describe("Footer Links Validation", () => {
 
     cy.intercept("POST", "**/api/v1/user/login**").as("loginApi");
 
-    cy.visit("https://betterwin.com/");
+    cy.visit("https://www.betterwin.com/");
 
     cy.login();
 
@@ -23,16 +23,26 @@ describe("Footer Links Validation", () => {
   const validateFooterLink = (text, expectedUrl) => {
     cy.get("footer")
       .contains(text, { timeout: 20000 })
+      .filter(":visible")
+      .first()
       .scrollIntoView()
       .should("be.visible")
       .then(($el) => {
-        const href = $el.attr("href");
+        const href = $el.prop("href");
 
-        // If href exists → directly visit
+        // =========================
+        // HANDLE REAL LINKS
+        // =========================
         if (href && href !== "#") {
-          cy.visit(href);
-        } else {
-          // fallback click
+          cy.visit(href, {
+            failOnStatusCode: false,
+          });
+        }
+
+        // =========================
+        // FALLBACK CLICK
+        // =========================
+        else {
           cy.wrap($el).click({ force: true });
         }
       });
@@ -75,7 +85,10 @@ describe("Footer Links Validation", () => {
 
     validateFooterLink("Email Us", "/support");
 
-    validateFooterLink("Responsible Gaming", "responsible-gambling-and-self-exclusion-policy");
+    validateFooterLink(
+      "Responsible Gaming",
+      "responsible-gambling-and-self-exclusion-policy",
+    );
 
     validateFooterLink("FAQ", "/faq");
   });

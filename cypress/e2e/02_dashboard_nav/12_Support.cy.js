@@ -7,7 +7,7 @@ describe('Support Page - UI Validation', () => {
 })
 
 beforeEach(() => {
-    cy.visit('https://betterwin.com/support')
+    cy.visit('https://www.betterwin.com/support')
     cy.login()
   })
 

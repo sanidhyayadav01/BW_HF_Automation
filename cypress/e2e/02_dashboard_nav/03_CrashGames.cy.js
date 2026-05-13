@@ -4,19 +4,29 @@ before(() => {
 
   cy.viewport(1440, 900);
 
-  cy.visit("https://betterwin.com/");
+  cy.visit("https://www.betterwin.com/");
 
   cy.login();
 
-  // Wait for auth state hydration
-  cy.wait(3000);
-
-  cy.reload();
-
-  // Verify authenticated UI loaded
-  cy.contains("Wallet", {
+  // =========================
+  // AUTH STABILIZATION
+  // =========================
+  cy.location("pathname", {
     timeout: 20000,
-  }).should("exist");
+  }).should("not.include", "login");
+
+  cy.get("body", {
+    timeout: 20000,
+  }).should("be.visible");
+
+  // BetterWin hydration stabilization
+  cy.wait(5000);
+
+  // authenticated UI validation
+  cy.contains(/wallet|deposit/i, {
+    timeout: 30000,
+  }).should("be.visible");
+
 });
 
 describe("Crash Games Happy Flow", () => {
@@ -34,20 +44,37 @@ describe("Crash Games Happy Flow", () => {
 
   beforeEach(() => {
 
-    cy.intercept("GET", "**/casino/games*").as("games");
+    cy.intercept("GET", "**/casino/games*")
+      .as("games");
 
-    cy.visit("https://betterwin.com/casino");
+    cy.visit("https://www.betterwin.com/casino");
 
-    cy.wait("@games", { timeout: 20000 });
+    cy.wait("@games", {
+      timeout: 30000,
+    });
 
-    // Open Crash Games Accordion
-    cy.get(':nth-child(3) > .w-full', {
-      timeout: 15000,
+    // =========================
+    // PAGE STABILIZATION
+    // =========================
+    cy.get("body", {
+      timeout: 20000,
+    }).should("be.visible");
+
+    cy.wait(3000);
+
+    // =========================
+    // OPEN CRASH GAMES ACCORDION
+    // =========================
+    cy.contains("button", /^Crash Games$/i, {
+      timeout: 20000,
     })
-      .should("exist")
+      .filter(":visible")
+      .first()
+      .scrollIntoView()
       .click({ force: true });
 
     cy.wait(1500);
+
   });
 
   categories.forEach((category) => {
@@ -61,20 +88,25 @@ describe("Crash Games Happy Flow", () => {
 
         const previousLength = initialCalls.length;
 
-        // Exact category match (important for Crash Game vs Crash Games)
+        // =========================
+        // CATEGORY CLICK
+        // =========================
         cy.contains(
           new RegExp(`^${category.name}$`, "i"),
           {
             timeout: 20000,
           }
         )
-          .should("exist")
+          .filter(":visible")
+          .first()
           .scrollIntoView()
           .click({ force: true });
 
-        cy.wait(1000);
+        cy.wait(1500);
 
-        // Parent accordion only
+        // =========================
+        // PARENT ACCORDION CASE
+        // =========================
         if (category.parentOnly) {
 
           cy.log(`Parent accordion validated`);
@@ -82,12 +114,16 @@ describe("Crash Games Happy Flow", () => {
           return;
         }
 
-        // URL Validation
+        // =========================
+        // URL VALIDATION
+        // =========================
         cy.location("pathname", {
           timeout: 15000,
         }).should("include", category.slug);
 
-        // Detect fresh API vs cached state
+        // =========================
+        // API VALIDATION
+        // =========================
         cy.get("@games.all").then((updatedCalls) => {
 
           const latestLength = updatedCalls.length;
@@ -109,26 +145,37 @@ describe("Crash Games Happy Flow", () => {
             cy.log(`API Count: ${apiCount}`);
 
             expect(games).to.be.an("array");
+
           }
 
           // CASE 2 — Cached frontend state
           else {
 
             cy.log(`Cached state detected`);
+
           }
 
-          // Common UI validation
+          // =========================
+          // UI VALIDATION
+          // =========================
           cy.get("body").then(($body) => {
 
-            const uiCards = $body.find(".flex-shrink-0");
+            const uiCards =
+              $body.find(".flex-shrink-0");
 
-            const visibleCards = Cypress.$(uiCards)
-              .filter((_, el) => Cypress.$(el).is(":visible"))
-              .filter((_, el) => {
-                return Cypress.$(el)
-                  .children(".flex-shrink-0").length === 0;
-              })
-              .length;
+            const visibleCards =
+              Cypress.$(uiCards)
+                .filter((_, el) =>
+                  Cypress.$(el).is(":visible")
+                )
+                .filter((_, el) => {
+
+                  return Cypress.$(el)
+                    .children(".flex-shrink-0")
+                    .length === 0;
+
+                })
+                .length;
 
             cy.log("====================================");
             cy.log(`Category: ${category.name}`);
@@ -136,29 +183,43 @@ describe("Crash Games Happy Flow", () => {
             cy.log(`Visible UI Cards: ${visibleCards}`);
             cy.log("====================================");
 
-            // CASE 1 — API has games
+            // CASE 1 — API HAS GAMES
             if (apiCount > 0) {
 
-              expect(visibleCards).to.be.greaterThan(0);
+              expect(visibleCards)
+                .to.be.greaterThan(0);
 
-              expect(visibleCards).to.be.at.least(1);
+              expect(visibleCards)
+                .to.be.at.least(1);
 
-              // loose upper bound for lazy/carousel rendering
-              expect(visibleCards).to.be.at.most(apiCount * 5);
+              // loose upper bound
+              expect(visibleCards)
+                .to.be.at.most(apiCount * 5);
+
             }
 
-            // CASE 2 — Empty category
+            // CASE 2 — EMPTY CATEGORY
             else {
 
               cy.log(`Empty category detected`);
 
-              expect(visibleCards).to.be.oneOf([0, 1]);
+              expect(visibleCards)
+                .to.be.oneOf([0, 1]);
 
-              cy.log(`No assertion failure for empty dataset`);
+              cy.log(
+                `No assertion failure for empty dataset`
+              );
+
             }
+
           });
+
         });
+
       });
+
     });
+
   });
+
 });

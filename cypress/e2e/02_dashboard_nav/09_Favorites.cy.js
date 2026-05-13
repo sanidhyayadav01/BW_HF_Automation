@@ -11,7 +11,7 @@ describe('Favorites - API vs UI Validation', () => {
     // intercept BEFORE navigation (important fix)
     cy.intercept('GET', '**/casino/get-favourite-game**').as('favoritesAPI')
 
-    cy.visit('https://betterwin.com/')
+    cy.visit('https://www.betterwin.com/')
 
     cy.login()
 
@@ -21,7 +21,7 @@ describe('Favorites - API vs UI Validation', () => {
 
   it('Validates Favorites page correctly (API + UI)', () => {
 
-    cy.visit('https://betterwin.com/favorites')
+    cy.visit('https://www.betterwin.com/favorites')
 
     // wait for API response
     cy.wait('@favoritesAPI', { timeout: 30000 })

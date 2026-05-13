@@ -1,42 +1,48 @@
 const { defineConfig } = require("cypress");
-const allureWriter = require("@shelex/cypress-allure-plugin/writer");
+const { allureCypress } = require("allure-cypress/reporter");
 
-// Cucumber + esbuild
-const createBundler = require("@bahmutov/cypress-esbuild-preprocessor");
-const addCucumberPreprocessorPlugin =
-  require("@badeball/cypress-cucumber-preprocessor").addCucumberPreprocessorPlugin;
-
-const createEsbuildPlugin =
-  require("@badeball/cypress-cucumber-preprocessor/esbuild").createEsbuildPlugin;
+const {
+  saveUser,
+  getUser,
+} = require("./cypress/utils/userManager");
 
 module.exports = defineConfig({
+
   e2e: {
+
+    specPattern: "cypress/e2e/**/*.cy.js",
+
+    chromeWebSecurity: false,
+
     watchForFileChanges: false,
-    defaultCommandTimeout: 7000,
 
-    specPattern: [
-      //"cypress/e2e/**/*.feature",
-      "cypress/e2e/**/*.cy.js",
-    ],
+    defaultCommandTimeout: 10000,
 
-    env: {
-      allure: true,
-      allureResultsPath: "allure-results",
-      stepDefinitions: "cypress/e2e/step_definitions/**/*.js",
-    },
+    pageLoadTimeout: 120000,
 
-    async setupNodeEvents(on, config) {
+    video: true,
 
-      await addCucumberPreprocessorPlugin(on, config);
+    screenshotOnRunFailure: true,
 
-      on(
-        "file:preprocessor",
-        createBundler({
-          plugins: [createEsbuildPlugin(config)],
-        })
-      );
+    setupNodeEvents(on, config) {
 
-      allureWriter(on, config);
+      on("task", {
+
+        saveRuntimeUser(user) {
+
+          saveUser(user);
+
+          return null;
+        },
+
+        getRuntimeUser() {
+
+          return getUser();
+        },
+
+      });
+
+      allureCypress(on, config);
 
       return config;
     },

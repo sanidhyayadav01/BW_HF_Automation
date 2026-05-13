@@ -12,7 +12,7 @@ describe('Casino Games - API vs UI Count', () => {
     cy.intercept('GET', '**/casino/games**').as('casinoGames')
 
     // login using your custom command
-    cy.visit('https://betterwin.com/')
+    cy.visit('https://www.betterwin.com/')
     cy.login()
 
     // small stability wait (UI hydration after login)
@@ -21,7 +21,7 @@ describe('Casino Games - API vs UI Count', () => {
 
   it('Validates API vs UI game count', () => {
 
-    cy.visit('https://betterwin.com/casino')
+    cy.visit('https://www.betterwin.com/casino')
 
     cy.wait('@casinoGames', { timeout: 30000 }).then((interception) => {
 

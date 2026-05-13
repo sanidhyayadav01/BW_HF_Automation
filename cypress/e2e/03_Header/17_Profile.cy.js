@@ -9,7 +9,7 @@ describe("Validating User Profile Section", function () {
     cy.intercept('POST', '**/api/v1/user/login**')
       .as('loginApi');
 
-    cy.visit('https://betterwin.com/');
+    cy.visit('https://www.betterwin.com/');
 
     cy.login();
 

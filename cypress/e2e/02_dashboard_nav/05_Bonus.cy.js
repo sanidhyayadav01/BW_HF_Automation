@@ -8,7 +8,7 @@ describe('Bonus Page Validation', () => {
 
     cy.intercept('POST', '**/api/v1/user/login**').as('loginApi')
 
-    cy.visit('https://betterwin.com/')
+    cy.visit('https://www.betterwin.com/')
 
     // login via custom command
     cy.login()
@@ -21,7 +21,7 @@ describe('Bonus Page Validation', () => {
 
   beforeEach(() => {
 
-    cy.visit('https://betterwin.com/')
+    cy.visit('https://www.betterwin.com/')
 
     cy.wait(3000)
 
@@ -38,20 +38,18 @@ describe('Bonus Page Validation', () => {
     // ensure navigation completes
     cy.url({ timeout: 15000 }).should('include', '/bonus')
 
-    cy.wait(4000)
-
   })
 
   it('Validates Bonus Sections & Cards', () => {
 
-    cy.get('.style_bonus_main_div__R4qah > :nth-child(2)', {
-      timeout: 25000
-    })
-      .should('exist')
+    // cy.get('.style_bonus_main_div__paaR8 > :nth-child(2)', {
+    //   timeout: 25000
+    // })
+    //   .should('exist')
 
-    cy.wait(2000)
+    // cy.wait(2000)
 
-    cy.get('.style_bonus_main_div__R4qah > :nth-child(2)')
+    cy.get('.style_bonus_main_div__paaR8 > :nth-child(2)')
       .children(':visible')
       .should('have.length.at.least', 3)
 

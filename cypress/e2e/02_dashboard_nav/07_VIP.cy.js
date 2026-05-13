@@ -14,7 +14,7 @@ describe('VIP Program - Tier Validation', () => {
     cy.intercept('GET', '**/gamification.betterwin.com/api/v1/user/vip/info/**')
       .as('vipInfo')
 
-    cy.visit('https://betterwin.com/')
+    cy.visit('https://www.betterwin.com/')
 
     cy.login()
 

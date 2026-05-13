@@ -10,13 +10,13 @@ describe('My Gameplay - Settings Navigation Validation', () => {
 
     cy.intercept('POST', '**/user/login*').as('loginAPI')
 
-    cy.visit('https://betterwin.com/')
+    cy.visit('https://www.betterwin.com/')
 
     cy.login()
 
     cy.wait('@loginAPI', { timeout: 30000 })
 
-    cy.visit('https://betterwin.com/setting?active=transactionDetail')
+    cy.visit('https://www.betterwin.com/setting?active=transactionDetail')
   })
 
 

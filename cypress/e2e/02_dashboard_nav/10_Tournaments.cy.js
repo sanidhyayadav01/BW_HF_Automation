@@ -16,7 +16,7 @@ describe('Tournaments Page - API vs UI Validation', () => {
 
     cy.intercept('POST', '**/user/login*').as('loginAPI')
 
-    cy.visit('https://betterwin.com/')
+    cy.visit('https://www.betterwin.com/')
 
     cy.login()
 
@@ -25,7 +25,7 @@ describe('Tournaments Page - API vs UI Validation', () => {
     // ensure UI fully hydrated after login
     cy.get('body').should('be.visible')
 
-    cy.visit('https://betterwin.com/tournament')
+    cy.visit('https://www.betterwin.com/tournament')
   })
 
 

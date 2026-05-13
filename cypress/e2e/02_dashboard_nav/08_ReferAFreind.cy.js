@@ -13,7 +13,7 @@ describe('Refer a Friend - Validation', () => {
       '**/gamification.betterwin.com/api/v1/user/referral/data**'
     ).as('referralData')
 
-    cy.visit('https://betterwin.com/')
+    cy.visit('https://www.betterwin.com/')
 
     cy.login()
 
