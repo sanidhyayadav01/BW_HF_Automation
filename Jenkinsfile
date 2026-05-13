@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     tools {
@@ -10,9 +11,7 @@ pipeline {
     }
 
     stages {
-        // =========================================
-        // CLONE REPOSITORY
-        // =========================================
+
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
@@ -20,84 +19,83 @@ pipeline {
             }
         }
 
-        // =========================================
-        // INSTALL DEPENDENCIES
-        // =========================================
         stage('Install Dependencies') {
             steps {
                 bat 'npm install'
             }
         }
 
-        // =========================================
-        // VERIFY CYPRESS
-        // =========================================
         stage('Verify Cypress') {
             steps {
                 bat 'npx cypress verify'
             }
         }
 
-        // =========================================
-        // CLEAN OLD REPORTS
-        // =========================================
         stage('Clean Previous Reports') {
             steps {
                 bat 'if exist allure-results rmdir /s /q allure-results'
-
                 bat 'if exist allure-report rmdir /s /q allure-report'
-
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
-
                 bat 'mkdir allure-results'
             }
         }
 
-        // =========================================
-        // RUN CYPRESS TESTS
-        // =========================================
         stage('Run Cypress Tests') {
+
             steps {
                 script {
+
+                    def testStatus = 'SUCCESS'
+
                     try {
+
                         bat '''
-    npx cypress run ^
-    --spec "cypress/e2e/00_auth/01_LoginSignup.cy.js,cypress/e2e/**/*.cy.js"
-    '''
-                    }
-                    finally {
-                        echo 'Cypress execution completed.'
+                        npx cypress run ^
+                        --spec "cypress/e2e/**/*.cy.js"
+                        '''
+
+                    } catch (err) {
+
+                        testStatus = 'FAILURE'
+                        currentBuild.result = 'FAILURE'
+                        throw err
+
+                    } finally {
+
+                        // if tests ran but had failures Cypress may mark unstable
+                        if (currentBuild.result == null) {
+                            currentBuild.result = testStatus
+                        }
+
+                        echo "Final Test Status: ${currentBuild.result}"
                     }
                 }
             }
         }
 
-        // =========================================
-        // GENERATE ALLURE REPORT
-        // =========================================
         stage('Publish Allure Report') {
             steps {
-                allure([
-                    includeProperties: false,
-                    jdk: '',
-                    results: [[path: 'allure-results']]
-                ])
+                script {
+                    catchError(buildResult: 'UNSTABLE') {
+                        allure([
+                            includeProperties: false,
+                            jdk: '',
+                            results: [[path: 'allure-results']]
+                        ])
+                    }
+                }
             }
         }
     }
 
-    // =========================================
-    // POST ACTIONS
-    // =========================================
     post {
-        // =====================================
-        // ALWAYS
-        // =====================================
+
         always {
+
             archiveArtifacts artifacts: '''
                 allure-results/**,
                 allure-report/**,
-                cypress/screenshots/**/*.png
+                cypress/screenshots/**
             ''',
             fingerprint: true,
             allowEmptyArchive: true
@@ -105,83 +103,122 @@ pipeline {
             echo 'Pipeline execution completed.'
         }
 
-        // =====================================
-        // SUCCESS MAIL
-        // =====================================
         success {
-            emailext(
 
-                subject: "✔ BW Automation SUCCESS - ${currentBuild.fullDisplayName}",
+            emailext(
+                subject: "✔ QA Daily Status — BetterWin Automation — ${new Date().format('dd-MM-yyyy')} ✅ PASS",
 
                 body: """
 Cypress Execution Completed Successfully
 
+Project: BetterWin Automation
+
+Status: ALL TESTS PASSED ✅
+
 Build URL:
 ${env.BUILD_URL}
 
-Allure Report:
-${env.BUILD_URL}allure
+Reports:
+- Allure Report: ${env.BUILD_URL}allure
 
-Artifacts:
-- Screenshots
-- Allure Report
+Checks Covered:
+✅ Login / Signup
+✅ Dashboard Navigation
+✅ Casino / Live Casino
+✅ Crash / Arcade Games
+✅ Promotions & Banner
+✅ Favorites
+✅ Tournaments
+✅ Footer Links
+
+
+Best Regards,  
+QA Team (Automation)
 """,
 
-                // MAIN RECIPIENTS
-                to: '''
-                    syadav@trueigtech.com,
-                    hyadav@trueigtech.com,
-                ''',
-
-                // CC RECIPIENTS
-                // cc: '''
-                //     teamlead@company.com,
-                //     devlead@company.com
-                // ''',
+                to: """
+syadav@trueigtech.com,
+hyadav@trueigtech.com
+""",
 
                 attachmentsPattern: '''
-                    cypress/screenshots/**/*.png
+                    cypress/screenshots/**
+                    allure-results/**
                 '''
             )
         }
 
-        // =====================================
-        // FAILURE MAIL
-        // =====================================
-        failure {
-            emailext(
+        unstable {
 
-                subject: "✘ BW Automation FAILED - ${currentBuild.fullDisplayName}",
+            emailext(
+                subject: "⚠ QA Daily Status — BetterWin Automation — ${new Date().format('dd-MM-yyyy')} ⚠ ISSUES FOUND",
 
                 body: """
-Cypress Execution FAILED
+Cypress Execution Completed WITH FAILURES
+
+Project: BetterWin Automation
+
+Status: SOME TESTS FAILED ⚠
 
 Build URL:
 ${env.BUILD_URL}
 
-Check:
-- Jenkins Console Logs
-- Allure Report
-- Attached Screenshots
+Please check:
+- Failing screenshots
+- Allure report
+- Jenkins console logs
 
-Allure:
-${env.BUILD_URL}allure
+
+Best Regards,  
+QA Team (Automation)
 """,
 
-                // MAIN RECIPIENTS
-                to: '''
-                    syadav@trueigtech.com,
-                    hyadav@trueigtech.com,
-                ''',
-
-                // CC RECIPIENTS
-                // cc: '''
-                //     teamlead@company.com,
-                //     devlead@company.com
-                // ''',
+                to: """
+syadav@trueigtech.com,
+hyadav@trueigtech.com
+""",
 
                 attachmentsPattern: '''
-                    cypress/screenshots/**/*.png
+                    cypress/screenshots/**
+                    allure-results/**
+                '''
+            )
+        }
+
+        failure {
+
+            emailext(
+                subject: "✘ QA Daily Status — BetterWin Automation — ${new Date().format('dd-MM-yyyy')} ❌ FAILED",
+
+                body: """
+Cypress Execution FAILED
+
+Project: BetterWin Automation
+
+Status: PIPELINE FAILED ❌
+
+Build URL:
+${env.BUILD_URL}
+
+Critical failure occurred in execution.
+
+Check:
+- Jenkins logs
+- Environment issues
+- Build setup
+
+
+Best Regards,  
+QA Team (Automation)
+""",
+
+                to: """
+syadav@trueigtech.com,
+hyadav@trueigtech.com
+""",
+
+                attachmentsPattern: '''
+                    cypress/screenshots/**
                 '''
             )
         }
