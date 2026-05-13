@@ -20,7 +20,7 @@ module.exports = defineConfig({
 
     pageLoadTimeout: 120000,
 
-    video: true,
+    //video: true,
 
     screenshotOnRunFailure: true,
 
