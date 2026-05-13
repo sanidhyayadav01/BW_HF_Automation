@@ -36,6 +36,7 @@ pipeline {
                 bat 'if exist allure-results rmdir /s /q allure-results'
                 bat 'if exist allure-report rmdir /s /q allure-report'
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
+                bat 'if exist test-report.zip del /f /q test-report.zip'
                 bat 'mkdir allure-results'
             }
         }
@@ -45,7 +46,7 @@ pipeline {
             steps {
                 script {
 
-                    def testStatus = 'SUCCESS'
+                    currentBuild.result = 'SUCCESS'
 
                     try {
 
@@ -56,18 +57,8 @@ pipeline {
 
                     } catch (err) {
 
-                        testStatus = 'FAILURE'
                         currentBuild.result = 'FAILURE'
-                        throw err
-
-                    } finally {
-
-                        // if tests ran but had failures Cypress may mark unstable
-                        if (currentBuild.result == null) {
-                            currentBuild.result = testStatus
-                        }
-
-                        echo "Final Test Status: ${currentBuild.result}"
+                        echo "Cypress failed but pipeline will continue..."
                     }
                 }
             }
@@ -86,6 +77,14 @@ pipeline {
                 }
             }
         }
+
+        stage('Create ZIP Report') {
+            steps {
+                bat '''
+                powershell Compress-Archive -Path allure-results,cypress\\screenshots -DestinationPath test-report.zip -Force
+                '''
+            }
+        }
     }
 
     post {
@@ -93,14 +92,14 @@ pipeline {
         always {
 
             archiveArtifacts artifacts: '''
+                test-report.zip,
                 allure-results/**,
-                allure-report/**,
                 cypress/screenshots/**
             ''',
             fingerprint: true,
             allowEmptyArchive: true
 
-            echo 'Pipeline execution completed.'
+            echo "Pipeline completed with status: ${currentBuild.result}"
         }
 
         success {
@@ -111,26 +110,13 @@ pipeline {
                 body: """
 Cypress Execution Completed Successfully
 
-Project: BetterWin Automation
-
 Status: ALL TESTS PASSED ✅
 
 Build URL:
 ${env.BUILD_URL}
 
-Reports:
-- Allure Report: ${env.BUILD_URL}allure
-
-Checks Covered:
-✅ Login / Signup
-✅ Dashboard Navigation
-✅ Casino / Live Casino
-✅ Crash / Arcade Games
-✅ Promotions & Banner
-✅ Favorites
-✅ Tournaments
-✅ Footer Links
-
+📦 Report Attached: ZIP File
+📊 Allure Report Available in Jenkins
 
 Best Regards,  
 QA Team (Automation)
@@ -142,8 +128,7 @@ hyadav@trueigtech.com
 """,
 
                 attachmentsPattern: '''
-                    cypress/screenshots/**
-                    allure-results/**
+                    test-report.zip
                 '''
             )
         }
@@ -154,20 +139,15 @@ hyadav@trueigtech.com
                 subject: "⚠ QA Daily Status — BetterWin Automation — ${new Date().format('dd-MM-yyyy')} ⚠ ISSUES FOUND",
 
                 body: """
-Cypress Execution Completed WITH FAILURES
+Cypress Execution Completed WITH FAILURES ⚠
 
-Project: BetterWin Automation
-
-Status: SOME TESTS FAILED ⚠
+Status: SOME TESTS FAILED
 
 Build URL:
 ${env.BUILD_URL}
 
-Please check:
-- Failing screenshots
-- Allure report
-- Jenkins console logs
-
+📦 Report Attached: ZIP File
+📊 Check Allure + Screenshots inside ZIP
 
 Best Regards,  
 QA Team (Automation)
@@ -178,9 +158,9 @@ syadav@trueigtech.com,
 hyadav@trueigtech.com
 """,
 
+
                 attachmentsPattern: '''
-                    cypress/screenshots/**
-                    allure-results/**
+                    test-report.zip
                 '''
             )
         }
@@ -191,22 +171,14 @@ hyadav@trueigtech.com
                 subject: "✘ QA Daily Status — BetterWin Automation — ${new Date().format('dd-MM-yyyy')} ❌ FAILED",
 
                 body: """
-Cypress Execution FAILED
-
-Project: BetterWin Automation
-
-Status: PIPELINE FAILED ❌
+Cypress Execution FAILED ❌
 
 Build URL:
 ${env.BUILD_URL}
 
-Critical failure occurred in execution.
+Critical issue occurred during execution.
 
-Check:
-- Jenkins logs
-- Environment issues
-- Build setup
-
+📦 ZIP report attached (if generated)
 
 Best Regards,  
 QA Team (Automation)
@@ -217,7 +189,9 @@ syadav@trueigtech.com,
 hyadav@trueigtech.com
 """,
 
+
                 attachmentsPattern: '''
+                    test-report.zip,
                     cypress/screenshots/**
                 '''
             )
