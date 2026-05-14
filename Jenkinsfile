@@ -125,7 +125,7 @@ dir /s /b cypress\\screenshots
 
             emailext(
 
-subject: "QA Daily Status — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ✅ PASS",
+subject: "Daily QA Check — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ✅ PASS",
 
 body: """
 
@@ -139,7 +139,7 @@ PASS ✅
 
 ==================================================
 
-TEST COVERAGE SUMMARY
+TEST COVERAGE SUMMARY : 
 
 Account Validation
 
@@ -206,6 +206,9 @@ QA Team (Automation)
 """,
 
 to: '''
+rohan@trueigtech.com,
+pravesh@trueigtech.com,
+aashima@trueigtech.com,
 hyadav@trueigtech.com,
 syadav@trueigtech.com
 '''
@@ -216,7 +219,7 @@ syadav@trueigtech.com
 
             emailext(
 
-subject: "QA Daily Status — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ⚠️ ISSUES FOUND",
+subject: "Daily QA Check — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ⚠️ ISSUES FOUND",
 
 body: """
 
@@ -287,6 +290,9 @@ QA Team (Automation)
 """,
 
 to: '''
+rohan@trueigtech.com,
+pravesh@trueigtech.com,
+aashima@trueigtech.com,
 hyadav@trueigtech.com,
 syadav@trueigtech.com
 ''',
@@ -301,7 +307,7 @@ cypress/screenshots/**/*.png
 
             emailext(
 
-subject: "QA Daily Status — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ❌ FAILED",
+subject: "Daily QA Check — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ❌ FAILED",
 
 body: """
 
@@ -351,6 +357,9 @@ QA Team (Automation)
 """,
 
 to: '''
+rohan@trueigtech.com,
+pravesh@trueigtech.com,
+aashima@trueigtech.com,
 hyadav@trueigtech.com,
 syadav@trueigtech.com
 ''',

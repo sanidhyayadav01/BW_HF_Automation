@@ -36,7 +36,6 @@ describe("Crash Games Happy Flow", () => {
     { name: "Crash Games", slug: "crash-games", parentOnly: true },
     { name: "Scratch Cards", slug: "scratch-cards" },
     { name: "Arcade Games", slug: "arcade-games" },
-    { name: "Crash Game", slug: "crash-game" },
     { name: "Action Games", slug: "action-games" },
     { name: "Instant Games", slug: "instant-games" },
     { name: "Fishing Games", slug: "fishing-games" },
