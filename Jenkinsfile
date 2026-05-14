@@ -209,8 +209,11 @@ QA Team (Automation)
 """,
 
 to: '''
-syadav@trueigtech.com,
-hyadav@trueigtech.com
+rohan@trueigtech.com,
+pravesh@trueigtech.com,
+aashima@trueigtech.com,
+hyadav@trueigtech.com,
+syadav@trueigtech.com
 '''
             )
         }
@@ -322,8 +325,11 @@ QA Team (Automation)
 """,
 
 to: '''
-syadav@trueigtech.com,
-hyadav@trueigtech.com
+rohan@trueigtech.com,
+pravesh@trueigtech.com,
+aashima@trueigtech.com,
+hyadav@trueigtech.com,
+syadav@trueigtech.com
 '''
             )
         }
