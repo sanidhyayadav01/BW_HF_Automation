@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -11,7 +10,6 @@ pipeline {
     }
 
     stages {
-
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
@@ -44,20 +42,16 @@ pipeline {
         stage('Run Cypress Tests') {
             steps {
                 script {
-
                     currentBuild.result = 'SUCCESS'
 
                     try {
-
                         bat '''
                         npx cypress run ^
                         --spec "cypress/e2e/**/*.cy.js"
                         '''
-
                     } catch (err) {
-
                         currentBuild.result = 'FAILURE'
-                        echo "Cypress failed but continuing pipeline..."
+                        echo 'Cypress failed but continuing pipeline...'
                     }
                 }
             }
@@ -81,28 +75,24 @@ pipeline {
             steps {
                 script {
                     bat '''
-                    powershell -Command "
-                        $items = @()
-
-                        if (Test-Path 'allure-results') { $items += 'allure-results' }
-                        if (Test-Path 'allure-report') { $items += 'allure-report' }
-                        if (Test-Path 'cypress\\screenshots') { $items += 'cypress\\screenshots' }
-
-                        if ($items.Count -gt 0) {
-                            Compress-Archive -Path $items -DestinationPath test-report.zip -Force
-                            Write-Host 'ZIP created successfully'
-                        } else {
-                            Write-Host 'No artifacts found for ZIP'
-                        }
-                    "
-                    '''
+powershell -ExecutionPolicy Bypass -Command ^
+"$items = @(); ^
+if (Test-Path 'allure-results') { $items += 'allure-results' }; ^
+if (Test-Path 'allure-report') { $items += 'allure-report' }; ^
+if (Test-Path 'cypress\\\\screenshots') { $items += 'cypress\\\\screenshots' }; ^
+if ($items.Count -gt 0) { ^
+Compress-Archive -Path $items -DestinationPath 'test-report.zip' -Force; ^
+Write-Host 'ZIP created successfully'; ^
+} else { ^
+Write-Host 'No artifacts found for ZIP'; ^
+}"
+            '''
                 }
             }
         }
     }
 
     post {
-
         always {
             archiveArtifacts artifacts: '''
                 test-report.zip,
