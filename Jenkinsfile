@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -11,7 +10,6 @@ pipeline {
     }
 
     stages {
-
         stage('Clone Repository') {
             steps {
                 git branch: 'main',
@@ -33,7 +31,6 @@ pipeline {
 
         stage('Clean Previous Reports') {
             steps {
-
                 bat 'if exist allure-results rmdir /s /q allure-results'
                 bat 'if exist allure-report rmdir /s /q allure-report'
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
@@ -44,65 +41,43 @@ pipeline {
         }
 
         stage('Run Cypress Tests') {
-
             steps {
-
                 script {
-
-                    currentBuild.result='SUCCESS'
+                    currentBuild.result = 'SUCCESS'
 
                     try {
-
                         bat '''
 npx cypress run ^
 --spec "cypress/e2e/00_auth/01_LoginSignup.cy.js"
 '''
-
                     }
-                    catch(err){
+                    catch (err) {
+                        echo 'Some tests failed, continuing...'
 
-                        echo "Some tests failed, continuing..."
-
-                        currentBuild.result='UNSTABLE'
+                        currentBuild.result = 'UNSTABLE'
                     }
-
                 }
-
             }
-
         }
 
         stage('Publish Allure Report') {
-
             steps {
-
                 script {
-
                     catchError(buildResult: 'UNSTABLE') {
-
                         allure([
                             includeProperties: false,
                             jdk: '',
                             results: [[path: 'allure-results']]
                         ])
-
                     }
-
                 }
-
             }
-
         }
 
-
         stage('Generate PDF Report') {
-
             steps {
-
                 script {
-
                     catchError(buildResult: 'SUCCESS') {
-
                         bat '''
 
                         powershell ^
@@ -114,7 +89,6 @@ Execution Date:
 
 Build:
 %BUILD_URL%
-
 
 Checks Covered:
 
@@ -156,7 +130,6 @@ Checks Covered:
 
 ✓ API verification using intercepts
 
-
 Not Included:
 
 - Wallet Transactions
@@ -166,7 +139,6 @@ Not Included:
 - Redeem Testing
 
 - Gameplay execution
-
 
 Allure Report:
 Open Jenkins → Allure Report tab
@@ -179,22 +151,14 @@ QA Team (Automation)
 $content | Out-File report.pdf"
 
                         '''
-
                     }
-
                 }
-
             }
-
         }
-
     }
 
-
     post {
-
         always {
-
             archiveArtifacts artifacts: '''
                 report.pdf,
                 allure-report/**,
@@ -206,10 +170,7 @@ $content | Out-File report.pdf"
             echo "Pipeline completed with status: ${currentBuild.result}"
         }
 
-
-
         success {
-
             emailext(
 
                 subject: "QA Daily Status — BetterWin (Automation Testing Report) — ${new Date().format('dd-MM-yyyy')} ✅ PASS",
@@ -219,7 +180,6 @@ $content | Out-File report.pdf"
 Daily QA happy flow testing completed for:
 
 • BetterWin — ✅ PASS
-
 
 Checks Covered:
 
@@ -261,16 +221,13 @@ Checks Covered:
 
 ✅ API verification using intercepts
 
-
 Build URL:
 
 ${env.BUILD_URL}
 
-
 Attached:
 
 📄 Automation Report PDF
-
 
 Best Regards,
 
@@ -287,10 +244,7 @@ hyadav@trueigtech.com
             )
         }
 
-
-
         unstable {
-
             emailext(
 
                 subject: "QA Daily Status — BetterWin (Automation Testing Report) — ${new Date().format('dd-MM-yyyy')} ⚠️ Issues Found",
@@ -301,7 +255,6 @@ Daily QA automation execution completed.
 
 BetterWin — ⚠️ Minor Issues Found
 
-
 Issues:
 
 • Some validations failed
@@ -310,16 +263,13 @@ Issues:
 
 • Check Allure report
 
-
 Build URL:
 
 ${env.BUILD_URL}
 
-
 Attached:
 
 📄 Automation Report PDF
-
 
 Best Regards,
 
@@ -339,10 +289,7 @@ cypress/screenshots/**
             )
         }
 
-
-
         failure {
-
             emailext(
 
                 subject: "QA Daily Status — BetterWin (Automation Testing Report) — ${new Date().format('dd-MM-yyyy')} ❌ Pipeline Failed",
@@ -359,11 +306,9 @@ Check:
 
 • Attached screenshots
 
-
 Build URL:
 
 ${env.BUILD_URL}
-
 
 Best Regards,
 
@@ -382,7 +327,5 @@ cypress/screenshots/**
 '''
             )
         }
-
     }
-
 }
