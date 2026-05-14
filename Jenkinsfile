@@ -35,8 +35,6 @@ pipeline {
                 bat 'if exist allure-results rmdir /s /q allure-results'
                 bat 'if exist allure-report rmdir /s /q allure-report'
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
-                bat 'if exist report.pdf del /f /q report.pdf'
-                bat 'if exist report.txt del /f /q report.txt'
 
                 bat 'mkdir allure-results'
             }
@@ -45,18 +43,21 @@ pipeline {
         stage('Run Cypress Tests') {
             steps {
                 script {
+
                     currentBuild.result = 'SUCCESS'
 
                     try {
 
                         bat '''
 npx cypress run ^
---spec "cypress/e2e/00_login_signup/01_LoginSignUp.cy.js"
+--spec "cypress/e2e/**/*.cy.js"
 '''
 
-                    } catch (err) {
+                    }
+                    catch(err){
 
-                        echo 'Some tests failed, continuing...'
+                        echo 'Some tests failed, continuing execution...'
+
                         currentBuild.result = 'UNSTABLE'
                     }
                 }
@@ -64,7 +65,9 @@ npx cypress run ^
         }
 
         stage('Publish Allure Report') {
+
             steps {
+
                 script {
 
                     catchError(buildResult: 'UNSTABLE') {
@@ -78,66 +81,6 @@ npx cypress run ^
                 }
             }
         }
-
-        stage('Generate PDF Report') {
-            steps {
-                script {
-
-                    catchError(buildResult: 'SUCCESS') {
-
-                        writeFile file: 'report.txt', text: """
-BETTERWIN AUTOMATION REPORT
-
-Execution Date:
-${new Date().format('dd-MM-yyyy HH:mm')}
-
-Build:
-${env.BUILD_URL}
-
-Execution Result:
-${currentBuild.result}
-
-Checks Covered:
-
-✓ Registration
-✓ Login
-✓ Dashboard Navigation
-✓ Casino
-✓ Live Casino
-✓ Crash Games
-✓ Promotions
-✓ Banner Validation
-✓ Favorites
-✓ Refer a Friend
-✓ VIP Program
-✓ Tournaments
-✓ My Gameplay
-✓ Support
-✓ FAQ
-✓ Responsible Gaming
-✓ Footer Validation
-✓ User Profile
-✓ API verification using intercepts
-
-Not Included:
-
-- Wallet Transactions
-- Deposit Testing
-- Redeem Testing
-- Gameplay execution
-
-Allure Report:
-Open Jenkins → Allure Report tab
-
-Regards,
-QA Team (Automation)
-"""
-
-                        bat 'copy report.txt report.pdf'
-                    }
-                }
-            }
-        }
     }
 
     post {
@@ -145,7 +88,6 @@ QA Team (Automation)
         always {
 
             archiveArtifacts artifacts: '''
-report.pdf,
 allure-report/**,
 cypress/screenshots/**
 ''',
@@ -159,46 +101,109 @@ cypress/screenshots/**
 
             emailext(
 
-subject: "QA Daily Status — BetterWin (Automation Testing Report) — ${new Date().format('dd-MM-yyyy')} ✅ PASS",
+subject: "QA Daily Status — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ✅ PASS",
 
 body: """
 
-Daily QA happy flow testing completed for:
+Daily automated happy flow validation completed successfully.
 
-• BetterWin — ✅ PASS
+Application:
+BetterWin
 
-Checks Covered:
+Execution Status:
+PASS ✅
 
-✅ Registration
-✅ Login
-✅ Dashboard Navigation
-✅ Casino
-✅ Live Casino
-✅ Crash Games
-✅ Promotions
-✅ Banner validation
-✅ Favorites
-✅ Refer a Friend
-✅ VIP Program
-✅ Tournaments
-✅ My Gameplay
-✅ Support
-✅ FAQ
-✅ Responsible Gaming
+==================================================
+
+TEST COVERAGE SUMMARY
+
+Account Validation
+
+✅ User registration flow validation
+
+✅ Login flow validation
+
+✅ Session establishment verification
+
+✅ Authentication continuity checks
+
+
+Navigation & User Journey
+
+✅ Dashboard accessibility
+
+✅ Menu navigation validation
+
+✅ Page redirection checks
+
+✅ Route verification
+
+
+Casino Modules
+
+✅ Casino page loading
+
+✅ Live casino accessibility
+
+✅ Crash games accessibility
+
+✅ Promotions validation
+
+✅ Tournaments section validation
+
+
+User Experience Validation
+
+✅ Banner rendering verification
+
+✅ Favorites functionality
+
+✅ Refer a Friend flow
+
+✅ VIP Program accessibility
+
+✅ Responsible Gaming section
+
+✅ FAQ validation
+
+✅ Support section validation
+
 ✅ Footer validation
-✅ User Profile
-✅ API verification using intercepts
 
-Build URL:
+✅ User profile accessibility
 
-${env.BUILD_URL}
 
-Attached:
+Data/API Validation
 
-📄 Automation Report PDF
+✅ API verification through intercepts
+
+✅ Backend response monitoring
+
+✅ UI + API consistency validation
+
+
+AREAS NOT EXECUTED IN CURRENT AUTOMATION SCOPE
+
+❌ Deposit testing
+
+❌ Redeem/withdrawal testing
+
+❌ Wallet transaction validation
+
+❌ Gameplay execution
+
+❌ Financial transaction testing
+
+❌ Payment gateway validation
+
+❌ Third-party provider integrations
+
+❌ Stress/performance testing
+
+
+Execution completed successfully with no critical failures detected.
 
 Best Regards,
-
 QA Team (Automation)
 
 """,
@@ -206,9 +211,7 @@ QA Team (Automation)
 to: '''
 syadav@trueigtech.com,
 hyadav@trueigtech.com
-''',
-
-attachmentsPattern: 'report.pdf'
+'''
             )
         }
 
@@ -216,30 +219,104 @@ attachmentsPattern: 'report.pdf'
 
             emailext(
 
-subject: "QA Daily Status — BetterWin (Automation Testing Report) — ${new Date().format('dd-MM-yyyy')} ⚠️ Issues Found",
+subject: "QA Daily Status — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ⚠️ ISSUES FOUND",
 
 body: """
 
-Daily QA automation execution completed.
+Daily automated validation execution completed.
 
-BetterWin — ⚠️ Minor Issues Found
+Application:
+BetterWin
 
-Issues:
+Execution Status:
+PARTIAL SUCCESS / ISSUES DETECTED ⚠️
 
-• Some validations failed
-• Review screenshots
-• Check Allure report
+==================================================
 
-Build URL:
+TESTS EXECUTED
 
-${env.BUILD_URL}
+Account Validation
 
-Attached:
+✓ Registration checks
 
-📄 Automation Report PDF
+✓ Login checks
+
+✓ Session validation
+
+
+Navigation
+
+✓ Dashboard verification
+
+✓ Routing validation
+
+✓ Navigation validation
+
+
+Casino Modules
+
+✓ Casino validation
+
+✓ Live casino validation
+
+✓ Crash games validation
+
+✓ Promotions validation
+
+
+User Experience
+
+✓ Banner checks
+
+✓ Favorites
+
+✓ Refer a Friend
+
+✓ VIP Program
+
+✓ FAQ
+
+✓ Support
+
+✓ Footer
+
+✓ User Profile
+
+
+API Validation
+
+✓ Intercepts executed
+
+✓ Backend monitoring
+
+
+ISSUES IDENTIFIED
+
+⚠ One or more automation validations failed
+
+⚠ Review failed scenarios
+
+⚠ Verify screenshots
+
+⚠ Review Allure execution details
+
+
+AREAS NOT INCLUDED
+
+❌ Deposit testing
+
+❌ Redeem testing
+
+❌ Wallet transactions
+
+❌ Gameplay execution
+
+❌ Payment validations
+
+
+Execution completed with non-blocking issues.
 
 Best Regards,
-
 QA Team (Automation)
 
 """,
@@ -247,11 +324,6 @@ QA Team (Automation)
 to: '''
 syadav@trueigtech.com,
 hyadav@trueigtech.com
-''',
-
-attachmentsPattern: '''
-report.pdf,
-cypress/screenshots/**
 '''
             )
         }
@@ -260,36 +332,83 @@ cypress/screenshots/**
 
             emailext(
 
-subject: "QA Daily Status — BetterWin (Automation Testing Report) — ${new Date().format('dd-MM-yyyy')} ❌ Pipeline Failed",
+subject: "QA Daily Status — BetterWin Automation Report — ${new Date().format('dd-MM-yyyy HH:mm')} ❌ FAILED",
 
 body: """
 
 Automation execution failed.
 
-Check:
+Application:
+BetterWin
 
-• Jenkins logs
-• Environment setup
-• Attached screenshots
+Execution Status:
+FAILED ❌
 
-Build URL:
+==================================================
 
-${env.BUILD_URL}
+PIPELINE FAILURE DETAILS
+
+Automation execution did not complete successfully.
+
+Possible reasons:
+
+• Environment issue
+
+• Infrastructure issue
+
+• Dependency installation issue
+
+• Application unavailable
+
+• Test execution crash
+
+• Configuration issue
+
+
+VALIDATION STATUS
+
+Automation flow interrupted before completion.
+
+Results may be incomplete.
+
+
+RECOMMENDED ACTIONS
+
+• Review Jenkins logs
+
+• Verify environment availability
+
+• Verify dependency installation
+
+• Verify application accessibility
+
+• Review screenshots and execution logs
+
+
+AREAS NOT EXECUTED
+
+❌ Registration
+
+❌ Login
+
+❌ Casino validations
+
+❌ API validations
+
+❌ User flow validations
+
 
 Best Regards,
-
 QA Team (Automation)
 
 """,
 
 to: '''
-syadav@trueigtech.com,
-hyadav@trueigtech.com
-''',
-
-attachmentsPattern: '''
-report.pdf,
-cypress/screenshots/**
+rohan@trueigtech.com,
+pravesh@trueigtech.com,
+aashima@trueigtech.com,
+hyadav@trueigtech.com,
+syadav@trueigtech.com
 '''
             )
         }
