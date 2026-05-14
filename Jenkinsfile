@@ -37,6 +37,7 @@ pipeline {
                 bat 'if exist allure-report rmdir /s /q allure-report'
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
                 bat 'if exist test-report.zip del /f /q test-report.zip'
+                bat 'if exist zip-content rmdir /s /q zip-content'
 
                 bat 'mkdir allure-results'
             }
@@ -45,9 +46,10 @@ pipeline {
         stage('Run Cypress Tests') {
 
             steps {
+
                 script {
 
-                    currentBuild.result = 'SUCCESS'
+                    currentBuild.result='SUCCESS'
 
                     try {
 
@@ -62,10 +64,13 @@ pipeline {
                         echo "Some tests failed, continuing..."
 
                         currentBuild.result='UNSTABLE'
+
                     }
 
                 }
+
             }
+
         }
 
         stage('Publish Allure Report') {
@@ -81,9 +86,13 @@ pipeline {
                             jdk: '',
                             results: [[path: 'allure-results']]
                         ])
+
                     }
+
                 }
+
             }
+
         }
 
 
@@ -96,10 +105,24 @@ pipeline {
                     catchError(buildResult: 'SUCCESS') {
 
                         bat '''
+
+                        mkdir zip-content
+
+                        if exist allure-report (
+                            xcopy /E /I /Y allure-report zip-content\\allure-report
+                        )
+
+                        if exist cypress\\screenshots (
+                            xcopy /E /I /Y cypress\\screenshots zip-content\\screenshots
+                        )
+
                         powershell Compress-Archive ^
-                        -Path allure-report,cypress\\screenshots ^
+                        -Path zip-content\\* ^
                         -DestinationPath test-report.zip ^
                         -Force
+
+                        echo ZIP created successfully
+
                         '''
 
                     }
@@ -119,7 +142,6 @@ pipeline {
 
             archiveArtifacts artifacts: '''
                 test-report.zip,
-                allure-results/**,
                 allure-report/**,
                 cypress/screenshots/**
             ''',
@@ -222,7 +244,6 @@ syadav@trueigtech.com,
 hyadav@trueigtech.com
 ''',
 
-                //CC USERS HERE
                 //cc: '''
                 //lead@company.com,
                 //manager@company.com
@@ -249,27 +270,27 @@ BetterWin — ⚠️ Minor Issues Found
 
 Checks Covered:
 
-✅ Registration
+Registration
 
-✅ Login
+Login
 
-✅ Dashboard Navigation
+Dashboard Navigation
 
-✅ Casino
+Casino
 
-✅ Live Casino
+Live Casino
 
-✅ Crash Games
+Crash Games
 
-✅ Promotions
+Promotions
 
-✅ Favorites
+Favorites
 
-✅ Footer
+Footer
 
-✅ User Profile
+User Profile
 
-✅ API verification
+API verification
 
 
 Issues Identified:
@@ -302,9 +323,7 @@ syadav@trueigtech.com,
 hyadav@trueigtech.com
 ''',
 
-                attachmentsPattern: '''
-                    test-report.zip
-                '''
+                attachmentsPattern: 'test-report.zip'
             )
         }
 
