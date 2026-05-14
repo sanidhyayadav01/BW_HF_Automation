@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     tools {
@@ -7,6 +8,7 @@ pipeline {
 
     environment {
         CI = 'true'
+        CYPRESS_screenshotOnRunFailure = 'true'
     }
 
     stages {
@@ -32,6 +34,7 @@ pipeline {
 
         stage('Clean Previous Reports') {
             steps {
+
                 bat 'if exist allure-results rmdir /s /q allure-results'
                 bat 'if exist allure-report rmdir /s /q allure-report'
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
@@ -41,7 +44,9 @@ pipeline {
         }
 
         stage('Run Cypress Tests') {
+
             steps {
+
                 script {
 
                     currentBuild.result = 'SUCCESS'
@@ -50,7 +55,8 @@ pipeline {
 
                         bat '''
 npx cypress run ^
---spec "cypress/e2e/**/*.cy.js"
+--spec "cypress/e2e/**/*.cy.js" ^
+--config video=false,screenshotOnRunFailure=true
 '''
 
                     }
@@ -58,7 +64,16 @@ npx cypress run ^
 
                         echo 'Some tests failed, continuing execution...'
 
-                        currentBuild.result = 'UNSTABLE'
+                        bat '''
+if exist cypress\\screenshots (
+echo ====================================
+echo FAILED SCREENSHOTS GENERATED:
+echo ====================================
+dir /s /b cypress\\screenshots
+)
+'''
+
+                        currentBuild.result='UNSTABLE'
                     }
                 }
             }
@@ -89,12 +104,21 @@ npx cypress run ^
 
             archiveArtifacts artifacts: '''
 allure-report/**,
-cypress/screenshots/**
+cypress/screenshots/**/*.png
 ''',
             fingerprint: true,
             allowEmptyArchive: true
 
             echo "Pipeline completed with status: ${currentBuild.result}"
+
+            bat '''
+if exist cypress\\screenshots (
+echo ====================================
+echo ARCHIVED SCREENSHOTS:
+echo ====================================
+dir /s /b cypress\\screenshots
+)
+'''
         }
 
         success {
@@ -120,84 +144,57 @@ TEST COVERAGE SUMMARY
 Account Validation
 
 ✅ User registration flow validation
-
 ✅ Login flow validation
-
 ✅ Session establishment verification
-
 ✅ Authentication continuity checks
 
 
 Navigation & User Journey
 
 ✅ Dashboard accessibility
-
 ✅ Menu navigation validation
-
 ✅ Page redirection checks
-
 ✅ Route verification
 
 
 Casino Modules
 
 ✅ Casino page loading
-
 ✅ Live casino accessibility
-
 ✅ Crash games accessibility
-
 ✅ Promotions validation
-
 ✅ Tournaments section validation
 
 
 User Experience Validation
 
 ✅ Banner rendering verification
-
 ✅ Favorites functionality
-
 ✅ Refer a Friend flow
-
 ✅ VIP Program accessibility
-
 ✅ Responsible Gaming section
-
 ✅ FAQ validation
-
 ✅ Support section validation
-
 ✅ Footer validation
-
 ✅ User profile accessibility
 
 
 Data/API Validation
 
 ✅ API verification through intercepts
-
 ✅ Backend response monitoring
-
 ✅ UI + API consistency validation
 
 
 AREAS NOT EXECUTED IN CURRENT AUTOMATION SCOPE
 
 ❌ Deposit testing
-
 ❌ Redeem/withdrawal testing
-
 ❌ Wallet transaction validation
-
 ❌ Gameplay execution
-
 ❌ Financial transaction testing
-
 ❌ Payment gateway validation
-
 ❌ Third-party provider integrations
-
 ❌ Stress/performance testing
 
 
@@ -209,9 +206,6 @@ QA Team (Automation)
 """,
 
 to: '''
-rohan@trueigtech.com,
-pravesh@trueigtech.com,
-aashima@trueigtech.com,
 hyadav@trueigtech.com,
 syadav@trueigtech.com
 '''
@@ -236,88 +230,56 @@ PARTIAL SUCCESS / ISSUES DETECTED ⚠️
 
 ==================================================
 
-TESTS EXECUTED
+TEST EXECUTION SUMMARY
 
-Account Validation
+Completed validations:
 
-✓ Registration checks
-
-✓ Login checks
-
-✓ Session validation
-
-
-Navigation
-
-✓ Dashboard verification
-
-✓ Routing validation
+✓ Authentication flows
 
 ✓ Navigation validation
 
+✓ Casino module checks
 
-Casino Modules
+✓ User experience checks
 
-✓ Casino validation
-
-✓ Live casino validation
-
-✓ Crash games validation
-
-✓ Promotions validation
+✓ API validations
 
 
-User Experience
+FAILED VALIDATIONS
 
-✓ Banner checks
+One or more scenarios failed during execution.
 
-✓ Favorites
+Attached screenshots contain exact failed pages.
 
-✓ Refer a Friend
+Screenshot names contain:
 
-✓ VIP Program
+• Spec filename (.cy.js)
 
-✓ FAQ
+• Failed test case name
 
-✓ Support
-
-✓ Footer
-
-✓ User Profile
+• Failure indication
 
 
-API Validation
 
-✓ Intercepts executed
+ACTION REQUIRED
 
-✓ Backend monitoring
+1. Open attached screenshots
 
+2. Identify failed spec file
 
-ISSUES IDENTIFIED
+3. Review Allure details
 
-⚠ One or more automation validations failed
-
-⚠ Review failed scenarios
-
-⚠ Verify screenshots
-
-⚠ Review Allure execution details
+4. Investigate application issue
 
 
 AREAS NOT INCLUDED
 
 ❌ Deposit testing
-
 ❌ Redeem testing
-
 ❌ Wallet transactions
-
 ❌ Gameplay execution
-
 ❌ Payment validations
 
-
-Execution completed with non-blocking issues.
 
 Best Regards,
 QA Team (Automation)
@@ -325,11 +287,12 @@ QA Team (Automation)
 """,
 
 to: '''
-rohan@trueigtech.com,
-pravesh@trueigtech.com,
-aashima@trueigtech.com,
 hyadav@trueigtech.com,
 syadav@trueigtech.com
+''',
+
+attachmentsPattern: '''
+cypress/screenshots/**/*.png
 '''
             )
         }
@@ -354,7 +317,7 @@ FAILED ❌
 
 PIPELINE FAILURE DETAILS
 
-Automation execution did not complete successfully.
+Automation execution could not complete.
 
 Possible reasons:
 
@@ -362,46 +325,24 @@ Possible reasons:
 
 • Infrastructure issue
 
-• Dependency installation issue
+• Dependency issue
+
+• Configuration issue
 
 • Application unavailable
 
 • Test execution crash
 
-• Configuration issue
 
-
-VALIDATION STATUS
-
-Automation flow interrupted before completion.
-
-Results may be incomplete.
-
-
-RECOMMENDED ACTIONS
+ACTION REQUIRED
 
 • Review Jenkins logs
 
-• Verify environment availability
+• Verify environment
 
-• Verify dependency installation
+• Review attached screenshots
 
 • Verify application accessibility
-
-• Review screenshots and execution logs
-
-
-AREAS NOT EXECUTED
-
-❌ Registration
-
-❌ Login
-
-❌ Casino validations
-
-❌ API validations
-
-❌ User flow validations
 
 
 Best Regards,
@@ -410,11 +351,12 @@ QA Team (Automation)
 """,
 
 to: '''
-rohan@trueigtech.com,
-pravesh@trueigtech.com,
-aashima@trueigtech.com,
 hyadav@trueigtech.com,
 syadav@trueigtech.com
+''',
+
+attachmentsPattern: '''
+cypress/screenshots/**/*.png
 '''
             )
         }
