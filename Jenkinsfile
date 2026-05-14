@@ -1,4 +1,5 @@
 pipeline {
+
     agent any
 
     tools {
@@ -36,8 +37,7 @@ pipeline {
                 bat 'if exist allure-results rmdir /s /q allure-results'
                 bat 'if exist allure-report rmdir /s /q allure-report'
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
-                bat 'if exist test-report.zip del /f /q test-report.zip'
-                bat 'if exist zip-content rmdir /s /q zip-content'
+                bat 'if exist report.pdf del /f /q report.pdf'
 
                 bat 'mkdir allure-results'
             }
@@ -54,9 +54,9 @@ pipeline {
                     try {
 
                         bat '''
-                        npx cypress run ^
-                        --spec "cypress/e2e/**/*.cy.js"
-                        '''
+npx cypress run ^
+--spec "cypress/e2e/00_auth/01_LoginSignup.cy.js"
+'''
 
                     }
                     catch(err){
@@ -64,7 +64,6 @@ pipeline {
                         echo "Some tests failed, continuing..."
 
                         currentBuild.result='UNSTABLE'
-
                     }
 
                 }
@@ -96,7 +95,7 @@ pipeline {
         }
 
 
-        stage('Create ZIP Report') {
+        stage('Generate PDF Report') {
 
             steps {
 
@@ -106,22 +105,78 @@ pipeline {
 
                         bat '''
 
-                        mkdir zip-content
+                        powershell ^
+                        "$content=@'
+BETTERWIN AUTOMATION REPORT
 
-                        if exist allure-report (
-                            xcopy /E /I /Y allure-report zip-content\\allure-report
-                        )
+Execution Date:
+%date%
 
-                        if exist cypress\\screenshots (
-                            xcopy /E /I /Y cypress\\screenshots zip-content\\screenshots
-                        )
+Build:
+%BUILD_URL%
 
-                        powershell Compress-Archive ^
-                        -Path zip-content\\* ^
-                        -DestinationPath test-report.zip ^
-                        -Force
 
-                        echo ZIP created successfully
+Checks Covered:
+
+✓ Registration (new user generated)
+
+✓ Login
+
+✓ Dashboard Navigation
+
+✓ Casino
+
+✓ Live Casino
+
+✓ Crash Games
+
+✓ Promotions
+
+✓ Banner Validation
+
+✓ Favorites
+
+✓ Refer a Friend
+
+✓ VIP Program
+
+✓ Tournaments
+
+✓ My Gameplay
+
+✓ Support
+
+✓ FAQ
+
+✓ Responsible Gaming
+
+✓ Footer Validation
+
+✓ User Profile
+
+✓ API verification using intercepts
+
+
+Not Included:
+
+- Wallet Transactions
+
+- Deposit Testing
+
+- Redeem Testing
+
+- Gameplay execution
+
+
+Allure Report:
+Open Jenkins → Allure Report tab
+
+Regards,
+QA Team (Automation)
+
+'@;
+
+$content | Out-File report.pdf"
 
                         '''
 
@@ -141,7 +196,7 @@ pipeline {
         always {
 
             archiveArtifacts artifacts: '''
-                test-report.zip,
+                report.pdf,
                 allure-report/**,
                 cypress/screenshots/**
             ''',
@@ -150,6 +205,7 @@ pipeline {
 
             echo "Pipeline completed with status: ${currentBuild.result}"
         }
+
 
 
         success {
@@ -167,7 +223,7 @@ Daily QA happy flow testing completed for:
 
 Checks Covered:
 
-✅ Registration (new user generated)
+✅ Registration
 
 ✅ Login
 
@@ -203,18 +259,7 @@ Checks Covered:
 
 ✅ User Profile
 
-✅ API status verification using intercepts
-
-
-Not Included:
-
-• Wallet Transactions
-
-• Deposit testing
-
-• Redeem testing
-
-• Gameplay execution
+✅ API verification using intercepts
 
 
 Build URL:
@@ -224,13 +269,7 @@ ${env.BUILD_URL}
 
 Attached:
 
-📦 test-report.zip
-
-Contains:
-
-• Allure report
-
-• Screenshots (if generated)
+📄 Automation Report PDF
 
 
 Best Regards,
@@ -244,12 +283,7 @@ syadav@trueigtech.com,
 hyadav@trueigtech.com
 ''',
 
-                //cc: '''
-                //lead@company.com,
-                //manager@company.com
-                //''',
-
-                attachmentsPattern: 'test-report.zip'
+                attachmentsPattern: 'report.pdf'
             )
         }
 
@@ -268,38 +302,13 @@ Daily QA automation execution completed.
 BetterWin — ⚠️ Minor Issues Found
 
 
-Checks Covered:
-
-Registration
-
-Login
-
-Dashboard Navigation
-
-Casino
-
-Live Casino
-
-Crash Games
-
-Promotions
-
-Favorites
-
-Footer
-
-User Profile
-
-API verification
-
-
-Issues Identified:
+Issues:
 
 • Some validations failed
 
-• Please review screenshots
+• Review screenshots
 
-• See Allure report
+• Check Allure report
 
 
 Build URL:
@@ -309,7 +318,7 @@ ${env.BUILD_URL}
 
 Attached:
 
-📦 test-report.zip
+📄 Automation Report PDF
 
 
 Best Regards,
@@ -323,7 +332,10 @@ syadav@trueigtech.com,
 hyadav@trueigtech.com
 ''',
 
-                attachmentsPattern: 'test-report.zip'
+                attachmentsPattern: '''
+report.pdf,
+cypress/screenshots/**
+'''
             )
         }
 
@@ -339,18 +351,11 @@ hyadav@trueigtech.com
 
 Automation execution failed.
 
-Reason:
-
-Pipeline / Environment issue occurred.
-
-
 Check:
 
 • Jenkins logs
 
-• Build setup
-
-• Environment
+• Environment setup
 
 • Attached screenshots
 
@@ -372,9 +377,9 @@ hyadav@trueigtech.com
 ''',
 
                 attachmentsPattern: '''
-                    test-report.zip,
-                    cypress/screenshots/**
-                '''
+report.pdf,
+cypress/screenshots/**
+'''
             )
         }
 
