@@ -48,7 +48,7 @@ pipeline {
                     try {
                         bat '''
 npx cypress run ^
---spec "cypress/e2e/00_auth/01_LoginSignup.cy.js"
+--spec "cypress/e2e/00_login_signup/01_LoginSignUp.cy.js"
 '''
                     }
                     catch (err) {
