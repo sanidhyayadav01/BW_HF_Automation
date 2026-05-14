@@ -13,7 +13,7 @@ describe("Validating Live Casino Section", () => {
 
     cy.login();
 
-    cy.visit("https://betterwin.com/live-casino/live-casino");
+    cy.visit("https://www.betterwin.com/live-casino/live-casino");
 
     cy.wait("@getCategory", { timeout: 20000 });
 

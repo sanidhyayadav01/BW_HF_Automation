@@ -33,7 +33,7 @@ describe('Promotions Page Validation', () => {
       '**/api/v1/system/promotions?*'
     ).as('getPromotions')
 
-    cy.visit('https://betterwin.com/promotion')
+    cy.visit('https://www.betterwin.com/promotion')
 
     cy.wait('@getPromotions', { timeout: 20000 })
 

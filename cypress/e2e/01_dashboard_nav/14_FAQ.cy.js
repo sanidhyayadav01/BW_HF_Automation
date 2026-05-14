@@ -16,7 +16,7 @@ describe('FAQ Page - UI Validation', () => {
 
     cy.wait('@loginAPI', { timeout: 30000 })
 
-    cy.visit('https://betterwin.com/faq')
+    cy.visit('https://www.betterwin.com/faq')
   })
 
 
