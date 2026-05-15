@@ -2,6 +2,10 @@ pipeline {
 
     agent any
 
+    triggers {
+        cron('0 11,18 * * *')
+    }
+
     tools {
         nodejs 'NodeJS'
     }
@@ -139,7 +143,7 @@ PASS ✅
 
 ==================================================
 
-TEST COVERAGE SUMMARY : 
+TEST COVERAGE SUMMARY :
 
 Account Validation
 
@@ -186,18 +190,6 @@ Data/API Validation
 ✅ UI + API consistency validation
 
 
-AREAS NOT EXECUTED IN CURRENT AUTOMATION SCOPE
-
-❌ Deposit testing
-❌ Redeem/withdrawal testing
-❌ Wallet transaction validation
-❌ Gameplay execution
-❌ Financial transaction testing
-❌ Payment gateway validation
-❌ Third-party provider integrations
-❌ Stress/performance testing
-
-
 Execution completed successfully with no critical failures detected.
 
 Best Regards,
@@ -210,6 +202,7 @@ rohan@trueigtech.com,
 pravesh@trueigtech.com,
 aashima@trueigtech.com,
 hyadav@trueigtech.com,
+sgupta@trueigtech.com,
 syadav@trueigtech.com
 '''
             )
@@ -238,13 +231,9 @@ TEST EXECUTION SUMMARY
 Completed validations:
 
 ✓ Authentication flows
-
 ✓ Navigation validation
-
 ✓ Casino module checks
-
 ✓ User experience checks
-
 ✓ API validations
 
 
@@ -263,7 +252,6 @@ Screenshot names contain:
 • Failure indication
 
 
-
 ACTION REQUIRED
 
 1. Open attached screenshots
@@ -273,15 +261,6 @@ ACTION REQUIRED
 3. Review Allure details
 
 4. Investigate application issue
-
-
-AREAS NOT INCLUDED
-
-❌ Deposit testing
-❌ Redeem testing
-❌ Wallet transactions
-❌ Gameplay execution
-❌ Payment validations
 
 
 Best Regards,
@@ -294,6 +273,7 @@ rohan@trueigtech.com,
 pravesh@trueigtech.com,
 aashima@trueigtech.com,
 hyadav@trueigtech.com,
+sgupta@trueigtech.com,
 syadav@trueigtech.com
 ''',
 
@@ -328,26 +308,18 @@ Automation execution could not complete.
 Possible reasons:
 
 • Environment issue
-
 • Infrastructure issue
-
 • Dependency issue
-
 • Configuration issue
-
 • Application unavailable
-
 • Test execution crash
 
 
 ACTION REQUIRED
 
 • Review Jenkins logs
-
 • Verify environment
-
 • Review attached screenshots
-
 • Verify application accessibility
 
 
@@ -361,6 +333,7 @@ rohan@trueigtech.com,
 pravesh@trueigtech.com,
 aashima@trueigtech.com,
 hyadav@trueigtech.com,
+sgupta@trueigtech.com,
 syadav@trueigtech.com
 ''',
 
