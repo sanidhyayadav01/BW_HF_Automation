@@ -2,10 +2,6 @@ pipeline {
 
     agent any
 
-    triggers {
-        cron('0 11,18 * * *')
-    }
-
     tools {
         nodejs 'NodeJS'
     }
@@ -27,12 +23,6 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 bat 'npm install'
-            }
-        }
-
-        stage('Verify Cypress') {
-            steps {
-                bat 'npx cypress verify'
             }
         }
 
