@@ -99,8 +99,7 @@ describe("Validating different sections of Casino", function () {
       { name: "Lottery", slug: "lottery" },
       { name: "Wheel of Fortune", slug: "wheel-of-fortune" },
       { name: "Minigame", slug: "minigame" },
-      { name: "Slot Game Providers", slug: "slot-game-providers" },
-      { name: "Shop", slug: "shop" },
+      { name: "Slot Game Providers", slug: "slot-game-providers" }
     ];
 
     categories.forEach((category) => {

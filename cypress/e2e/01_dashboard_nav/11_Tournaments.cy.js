@@ -44,6 +44,20 @@ describe('Tournaments Page - API vs UI Validation', () => {
     cy.wait(4000)
   })
 
+  const validateJoinAndViewButtons = (apiCount, tabName) => {
+    if (apiCount > 0) {
+      cy.contains('button, a', /join/i, { timeout: 20000 })
+        .should('be.visible')
+
+      cy.contains('button, a', /view/i, { timeout: 20000 })
+        .should('be.visible')
+
+      cy.log(`${tabName}: Join and View buttons are visible`)
+    } else {
+      cy.log(`${tabName}: no tournaments returned by API`)
+    }
+  }
+
 
   // ==========================
   // UPCOMING
@@ -73,11 +87,9 @@ describe('Tournaments Page - API vs UI Validation', () => {
       cy.log(`Upcoming API Count: ${apiCount}`)
 
       expect(apiCount).to.be.at.least(0)
-    })
 
-    cy.get('.my-10', {
-      timeout: 20000
-    }).should('be.visible')
+      validateJoinAndViewButtons(apiCount, 'Upcoming')
+    })
 
     cy.get('body').then(($body) => {
 
@@ -124,11 +136,9 @@ describe('Tournaments Page - API vs UI Validation', () => {
       cy.log(`Active API Count: ${apiCount}`)
 
       expect(apiCount).to.be.at.least(0)
-    })
 
-    cy.get('.my-10', {
-      timeout: 20000
-    }).should('be.visible')
+      validateJoinAndViewButtons(apiCount, 'Active')
+    })
 
     cy.get('body').then(($body) => {
 
