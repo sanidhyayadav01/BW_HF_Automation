@@ -28,12 +28,9 @@ pipeline {
 
         stage('Clean Previous Reports') {
             steps {
-
                 bat 'if exist allure-results rmdir /s /q allure-results'
                 bat 'if exist allure-report rmdir /s /q allure-report'
                 bat 'if exist cypress\\screenshots rmdir /s /q cypress\\screenshots'
-
-                bat 'mkdir allure-results'
             }
         }
 
@@ -50,11 +47,12 @@ pipeline {
                         bat '''
 npx cypress run ^
 --spec "cypress/e2e/**/*.cy.js" ^
---config video=false,screenshotOnRunFailure=true
+--config video=false,screenshotOnRunFailure=true ^
+--env allure=true
 '''
 
                     }
-                    catch(err){
+                    catch(err) {
 
                         echo 'Some tests failed, continuing execution...'
 
@@ -66,9 +64,21 @@ echo ====================================
 dir /s /b cypress\\screenshots
 )
 '''
-
-                        currentBuild.result='UNSTABLE'
+                        currentBuild.result = 'UNSTABLE'
                     }
+
+                    // Safety net — runs whether tests passed or failed
+                    bat '''
+if not exist allure-results (
+echo ====================================
+echo WARNING: allure-results NOT created by Cypress!
+echo Creating empty folder to prevent pipeline crash...
+echo ====================================
+mkdir allure-results
+)
+echo === Allure Results Content ===
+dir allure-results
+'''
                 }
             }
         }
@@ -236,11 +246,11 @@ Attached screenshots contain exact failed pages.
 
 Screenshot names contain:
 
-• Spec filename (.cy.js)
+- Spec filename (.cy.js)
 
-• Failed test case name
+- Failed test case name
 
-• Failure indication
+- Failure indication
 
 
 ACTION REQUIRED
@@ -299,20 +309,20 @@ Automation execution could not complete.
 
 Possible reasons:
 
-• Environment issue
-• Infrastructure issue
-• Dependency issue
-• Configuration issue
-• Application unavailable
-• Test execution crash
+- Environment issue
+- Infrastructure issue
+- Dependency issue
+- Configuration issue
+- Application unavailable
+- Test execution crash
 
 
 ACTION REQUIRED
 
-• Review Jenkins logs
-• Verify environment
-• Review attached screenshots
-• Verify application accessibility
+- Review Jenkins logs
+- Verify environment
+- Review attached screenshots
+- Verify application accessibility
 
 
 Best Regards,
