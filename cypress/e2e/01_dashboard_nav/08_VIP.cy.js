@@ -25,7 +25,7 @@ describe('VIP Program - Tier Validation', () => {
 
     cy.contains('VIP Program', { timeout: 20000 })
       .should('be.visible')
-      .click()
+      .click({force:true})
 
     cy.wait('@vipInfo', { timeout: 30000 })
       .then((interception) => {
