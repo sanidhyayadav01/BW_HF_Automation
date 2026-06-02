@@ -204,6 +204,7 @@ aashima@trueigtech.com,
 ansh@trueigtech.com,
 hyadav@trueigtech.com,
 sgupta@trueigtech.com,
+dpatidar@trueigtech.com,
 syadav@trueigtech.com
 '''
             )
@@ -276,6 +277,7 @@ aashima@trueigtech.com,
 ansh@trueigtech.com,
 hyadav@trueigtech.com,
 sgupta@trueigtech.com,
+dpatidar@trueigtech.com,
 syadav@trueigtech.com
 ''',
 
@@ -337,6 +339,7 @@ aashima@trueigtech.com,
 ansh@trueigtech.com,
 hyadav@trueigtech.com,
 sgupta@trueigtech.com,
+dpatidar@trueigtech.com,
 syadav@trueigtech.com
 ''',
 
