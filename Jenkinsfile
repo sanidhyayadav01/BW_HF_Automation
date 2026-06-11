@@ -198,13 +198,13 @@ QA Team (Automation)
 """,
 
 to: '''
-rohan@trueigtech.com,
-pravesh@trueigtech.com,
-aashima@trueigtech.com,
-ansh@trueigtech.com,
-hyadav@trueigtech.com,
-sgupta@trueigtech.com,
-dpatidar@trueigtech.com,
+// rohan@trueigtech.com,
+// pravesh@trueigtech.com,
+// aashima@trueigtech.com,
+// ansh@trueigtech.com,
+// hyadav@trueigtech.com,
+// sgupta@trueigtech.com,
+// dpatidar@trueigtech.com,
 syadav@trueigtech.com
 '''
             )
@@ -271,13 +271,13 @@ QA Team (Automation)
 """,
 
 to: '''
-rohan@trueigtech.com,
-pravesh@trueigtech.com,
-aashima@trueigtech.com,
-ansh@trueigtech.com,
-hyadav@trueigtech.com,
-sgupta@trueigtech.com,
-dpatidar@trueigtech.com,
+// rohan@trueigtech.com,
+// pravesh@trueigtech.com,
+// aashima@trueigtech.com,
+// ansh@trueigtech.com,
+// hyadav@trueigtech.com,
+// sgupta@trueigtech.com,
+// dpatidar@trueigtech.com,
 syadav@trueigtech.com
 ''',
 
@@ -333,13 +333,13 @@ QA Team (Automation)
 """,
 
 to: '''
-rohan@trueigtech.com,
-pravesh@trueigtech.com,
-aashima@trueigtech.com,
-ansh@trueigtech.com,
-hyadav@trueigtech.com,
-sgupta@trueigtech.com,
-dpatidar@trueigtech.com,
+// rohan@trueigtech.com,
+// pravesh@trueigtech.com,
+// aashima@trueigtech.com,
+// ansh@trueigtech.com,
+// hyadav@trueigtech.com,
+// sgupta@trueigtech.com,
+// dpatidar@trueigtech.com,
 syadav@trueigtech.com
 ''',
 
