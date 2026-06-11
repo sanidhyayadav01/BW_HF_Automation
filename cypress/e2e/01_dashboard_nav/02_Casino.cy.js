@@ -75,6 +75,8 @@ describe("Validating different sections of Casino", function () {
     const categories = [
       { name: "Top Games", slug: "top-games" },
       { name: "New Games", slug: "new-games" },
+      { name: "World Cup 2026", slug: "world-cup-2026" },
+      { name: "Top Sports Event", slug: "top-sports-event" },
       { name: "Bingo", slug: "bingo" },
       { name: "Blackjack", slug: "blackjack" },
       { name: "Roulette", slug: "roulette" },
@@ -84,10 +86,8 @@ describe("Validating different sections of Casino", function () {
       { name: "Megaways", slug: "megaways" },
       { name: "Slots Deluxe", slug: "slots-deluxe" },
       { name: "Jackpots", slug: "jackpots" },
-      { name: "Books Library", slug: "books-library" },
       { name: "Classics", slug: "classics" },
       { name: "Vegas Slots", slug: "vegas-slots" },
-      { name: "Mythology", slug: "mythology" },
       { name: "Egyptian", slug: "egyptian" },
       { name: "Hot & Cold", slug: "hot-cold" },
       { name: "Table Games", slug: "table-games" },
@@ -98,7 +98,6 @@ describe("Validating different sections of Casino", function () {
       { name: "Dice", slug: "dice" },
       { name: "Lottery", slug: "lottery" },
       { name: "Wheel of Fortune", slug: "wheel-of-fortune" },
-      { name: "Minigame", slug: "minigame" },
       { name: "Slot Game Providers", slug: "slot-game-providers" }
     ];
 

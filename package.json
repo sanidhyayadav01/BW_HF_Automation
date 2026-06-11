@@ -16,8 +16,10 @@
   "type": "commonjs",
   "devDependencies": {
     "allure-commandline": "^2.40.0",
-    "allure-cypress": "^3.8.0",
-    "cypress": "^15.14.1",
+    "allure-cypress": "^2.15.0",
+    "allure-js-commons": "^2.15.0",
+    "cypress": "^13.6.0",
+    "cypress-iframe": "^1.0.1",
     "cypress-xpath": "^2.0.1",
     "esbuild": "^0.28.0",
     "rimraf": "^6.1.3"
